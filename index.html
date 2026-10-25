@@ -30,99 +30,83 @@
       display: flex;
       align-items: center;
       gap: 14px;
-      padding: 18px;
+      padding: 15px;
       background: #123036;
     }
 
     .avatar {
-      position: relative;
-      width: 76px;
-      height: 76px;
+      width: 65px;
+      height: 65px;
       flex: none;
-      overflow: hidden;
+      display: grid;
+      place-items: center;
       border-radius: 50%;
-      background: #90d9ca;
       border: 3px solid #65dec7;
+      background: #90d9ca;
+      font-size: 37px;
     }
 
-    .hoodie {
-      position: absolute;
-      width: 75px;
-      height: 35px;
-      left: 0;
-      top: 57px;
-      border-radius: 35px 35px 0 0;
-      background: #258d83;
+    header h1 { margin: 0 0 4px; font-size: 21px; }
+    header p { margin: 0; color: #b6d7d0; font-size: 12px; }
+
+    .timeline {
+      padding: 11px 15px;
+      background: #19444a;
+      border-bottom: 1px solid #397d78;
     }
 
-    .face {
-      position: absolute;
-      width: 43px;
-      height: 52px;
-      left: 15px;
-      top: 14px;
-      border-radius: 45% 45% 48% 48%;
-      background: #eab18f;
+    .timeline-top {
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+      align-items: center;
+      font-size: 13px;
     }
 
-    .hair {
-      position: absolute;
-      width: 51px;
-      height: 25px;
-      left: 11px;
-      top: 8px;
-      border-radius: 55% 60% 35% 20%;
-      background: #272332;
-      transform: rotate(-8deg);
+    .steps {
+      display: flex;
+      gap: 6px;
+      margin-top: 9px;
     }
 
-    .hair::after {
-      content: "";
-      position: absolute;
-      width: 20px;
-      height: 18px;
-      left: 3px;
-      top: 12px;
-      border-radius: 50%;
-      background: #272332;
+    .step {
+      flex: 1;
+      padding: 7px 3px;
+      border-radius: 9px;
+      background: #275b5b;
+      color: #b6d7d0;
+      text-align: center;
+      font-size: 12px;
     }
 
-    .eyes {
-      position: absolute;
-      left: 24px;
-      top: 40px;
-      color: #347d68;
-      font-size: 15px;
-      letter-spacing: 9px;
-      line-height: 1;
+    .step.active {
+      background: #79dfc5;
+      color: #10332d;
+      font-weight: bold;
     }
 
-    .smile {
-      position: absolute;
-      left: 32px;
-      top: 50px;
-      font-size: 21px;
-      color: #9c5961;
-      line-height: 1;
+    #tijdlijnTekst {
+      margin: 8px 0 0;
+      color: #b6d7d0;
+      font-size: 12px;
+      line-height: 1.4;
     }
-
-    header h1 { margin: 0 0 4px; font-size: 22px; }
-    header p { margin: 0; color: #b6d7d0; font-size: 13px; }
 
     #chat {
       flex: 1;
       overflow-y: auto;
-      padding: 20px;
+      padding: 17px;
     }
 
     .message {
-      max-width: 82%;
+      max-width: 84%;
       width: fit-content;
       padding: 11px 14px;
-      margin-bottom: 12px;
+      margin-bottom: 11px;
       border-radius: 17px;
       line-height: 1.4;
       overflow-wrap: anywhere;
+      white-space: pre-wrap;
     }
 
     .noah { background: #275b5b; }
@@ -135,8 +119,8 @@
 
     form {
       display: flex;
-      gap: 9px;
-      padding: 14px;
+      gap: 8px;
+      padding: 12px;
       background: #123036;
     }
 
@@ -145,287 +129,515 @@
       min-width: 0;
       border: 0;
       border-radius: 12px;
-      padding: 13px;
+      padding: 12px;
       font-size: 16px;
     }
 
     button {
       border: 0;
       border-radius: 12px;
-      padding: 0 17px;
+      padding: 0 14px;
       background: #79dfc5;
       color: #10332d;
       font-weight: bold;
       cursor: pointer;
+    }
+
+    button:disabled { opacity: .6; cursor: wait; }
+
+    .footer {
+      padding: 0 12px 10px;
+      background: #123036;
+      color: #b6d7d0;
+      font-size: 11px;
+      text-align: center;
+    }
+
+    .footer button {
+      padding: 0;
+      background: none;
+      color: #b6d7d0;
+      text-decoration: underline;
+      font-size: 11px;
     }
   </style>
 </head>
 <body>
   <main class="app">
     <header>
-      <div class="avatar" aria-label="Getekend portret van Noah">
-        <div class="hoodie"></div>
-        <div class="face"></div>
-        <div class="hair"></div>
-        <div class="eyes">●●</div>
-        <div class="smile">⌣</div>
-      </div>
+      <div class="avatar" aria-hidden="true">🙂</div>
       <div>
         <h1>Noah 💚</h1>
-        <p>Fictieve chatvriend • 13 jaar</p>
+        <p>Fictieve chatvriend • 13 jaar • geen echte AI</p>
       </div>
     </header>
+
+    <section class="timeline" aria-label="Relatietijdlijn">
+      <div class="timeline-top">
+        <strong>Onze tijdlijn</strong>
+        <span id="status">Vreemden</span>
+      </div>
+      <div class="steps">
+        <span class="step" id="stap0">Vreemden</span>
+        <span class="step" id="stap1">Vrienden</span>
+        <span class="step" id="stap2">Een stel</span>
+      </div>
+      <p id="tijdlijnTekst"></p>
+    </section>
 
     <div id="chat" aria-live="polite"></div>
 
     <form id="form">
-      <input id="invoer" placeholder="Typ hier iets..." autocomplete="off">
-      <button type="submit">Stuur</button>
+      <input id="invoer" placeholder="Typ hier iets..." autocomplete="off" maxlength="400">
+      <button id="stuur" type="submit">Stuur</button>
     </form>
+
+    <div class="footer">
+      Gesprek wordt alleen in deze browser bewaard.
+      <button id="reset" type="button">Wis gesprek</button>
+    </div>
   </main>
 
   <script>
+    const sleutel = "noah-chat-versie-2";
     const chat = document.getElementById("chat");
     const invoer = document.getElementById("invoer");
+    const stuur = document.getElementById("stuur");
 
-    let vorigOnderwerp = "";
-    let vorigAntwoord = "";
-    const gebruikteAntwoorden = {};
+    function vandaag() {
+      const nu = new Date();
+      return [
+        nu.getFullYear(),
+        String(nu.getMonth() + 1).padStart(2, "0"),
+        String(nu.getDate()).padStart(2, "0")
+      ].join("-");
+    }
 
-    function bericht(tekst, vanWie) {
+    function nieuweStaat() {
+      return {
+        fase: 0,
+        eersteDag: vandaag(),
+        dagen: [],
+        aantalBerichten: 0,
+        laatsteOnderwerp: "",
+        laatsteVraag: "",
+        vorigAntwoord: "",
+        geschiedenis: [],
+        momenten: [
+          { datum: vandaag(), tekst: "Jullie ontmoetten elkaar." }
+        ]
+      };
+    }
+
+    let staat;
+
+    try {
+      staat = JSON.parse(localStorage.getItem(sleutel)) || nieuweStaat();
+      if (!Array.isArray(staat.geschiedenis) ||
+          !Array.isArray(staat.dagen) ||
+          !Array.isArray(staat.momenten)) {
+        staat = nieuweStaat();
+      }
+    } catch {
+      staat = nieuweStaat();
+    }
+
+    function bewaar() {
+      try {
+        localStorage.setItem(sleutel, JSON.stringify(staat));
+      } catch {
+        // De chat blijft werken als de browser geen opslag toestaat.
+      }
+    }
+
+    function toonBericht(tekst, vanWie, opslaan = true) {
       const vak = document.createElement("div");
       vak.className = "message " + vanWie;
       vak.textContent = tekst;
       chat.appendChild(vak);
       chat.scrollTop = chat.scrollHeight;
+
+      if (opslaan) {
+        staat.geschiedenis.push({ tekst, vanWie });
+        staat.geschiedenis = staat.geschiedenis.slice(-100);
+        bewaar();
+      }
     }
 
-    // Kiest afwisselend uit de reacties van één onderwerp.
-    function kies(onderwerp, reacties) {
-      if (!gebruikteAntwoorden[onderwerp]) {
-        gebruikteAntwoorden[onderwerp] = [];
+    function aantalDagenSinds(startdatum) {
+      const start = new Date(startdatum + "T12:00:00");
+      const nu = new Date(vandaag() + "T12:00:00");
+      return Math.max(0, Math.round((nu - start) / 86400000));
+    }
+
+    function updateTijdlijn() {
+      const namen = ["Vreemden", "Vrienden", "Een stel"];
+      document.getElementById("status").textContent = namen[staat.fase];
+
+      for (let i = 0; i < 3; i++) {
+        document.getElementById("stap" + i)
+          .classList.toggle("active", i <= staat.fase);
       }
 
-      let opties = reacties.filter(reactie =>
-        !gebruikteAntwoorden[onderwerp].includes(reactie) &&
-        reactie !== vorigAntwoord
-      );
+      const laatste = staat.momenten.at(-1);
+      const gebeurtenis = laatste
+        ? laatste.datum + ": " + laatste.tekst
+        : "";
 
-      if (opties.length === 0) {
-        gebruikteAntwoorden[onderwerp] = [];
-        opties = reacties.filter(reactie => reactie !== vorigAntwoord);
+      let uitleg = "";
+
+      if (staat.fase === 0) {
+        uitleg = "Jullie leren elkaar rustig kennen.";
+      } else if (staat.fase === 1) {
+        uitleg = "Jullie zijn vrienden. Een relatie ontstaat niet automatisch.";
+      } else {
+        uitleg = "Jullie zijn in dit fictieve verhaal een stel.";
       }
 
-      if (opties.length === 0) opties = reacties;
+      document.getElementById("tijdlijnTekst").textContent =
+        gebeurtenis + " " + uitleg;
+    }
 
-      const antwoord = opties[Math.floor(Math.random() * opties.length)];
-      gebruikteAntwoorden[onderwerp].push(antwoord);
-      vorigAntwoord = antwoord;
+    function kies(opties) {
+      const anders = opties.filter(tekst => tekst !== staat.vorigAntwoord);
+      const lijst = anders.length ? anders : opties;
+      const antwoord = lijst[Math.floor(Math.random() * lijst.length)];
+      staat.vorigAntwoord = antwoord;
       return antwoord;
     }
 
-    function reageer(onderwerp, reacties) {
-      vorigOnderwerp = onderwerp;
-      return kies(onderwerp, reacties);
+    function kort(tekst) {
+      const schoon = tekst.replace(/\s+/g, " ").trim();
+      return schoon.length > 65
+        ? schoon.slice(0, 62).trimEnd() + "..."
+        : schoon;
+    }
+
+    function vraag(onderwerp, tekst) {
+      staat.laatsteOnderwerp = onderwerp;
+      staat.laatsteVraag = tekst;
+      return tekst;
+    }
+
+    function onderwerpVan(zin) {
+      if (/\b(toets|huiswerk|school|les|cijfer|leraar|wiskunde)\b/.test(zin))
+        return "school";
+
+      if (/\b(game|gamen|spel|minecraft|roblox)\b/.test(zin))
+        return "games";
+
+      if (/\b(muziek|liedje|nummer|zingen|artiest)\b/.test(zin))
+        return "muziek";
+
+      if (/\b(film|serie|bioscoop)\b/.test(zin))
+        return "film";
+
+      if (/\b(crush|verliefd|verkering|daten)\b/.test(zin))
+        return "crush";
+
+      if (/\b(eten|honger|pizza|snack)\b/.test(zin))
+        return "eten";
+
+      return "";
     }
 
     function antwoordOp(tekst) {
       const zin = tekst.toLowerCase().trim();
+      const schoon = kort(tekst);
 
-      // Serieuze berichten krijgen altijd voorrang op speelse reacties.
+      // Serieuze berichten krijgen voorrang op alle speelse reacties.
       if (/ik wil dood|zelfmoord|mezelf pijn doen|zelfbeschadig/.test(zin)) {
-        return reageer("veiligheid", [
-          "Het klinkt alsof je het heel zwaar hebt. Blijf hier niet alleen mee: vertel het nu aan een volwassene die je vertrouwt.",
-          "Dit is belangrijk. Zoek alsjeblieft meteen iemand in je omgeving die je vertrouwt en vertel wat er speelt."
-        ]);
+        staat.laatsteOnderwerp = "";
+        return "Het klinkt alsof je het heel zwaar hebt. Vertel dit alsjeblieft nu aan een volwassene die je vertrouwt. Ben je direct in gevaar? Bel dan de hulpdiensten.";
       }
 
-      if (/verdrietig|eenzaam|huil|rot|niet goed|somber|bang/.test(zin)) {
-        return reageer("verdriet", [
-          "Ach, dat klinkt niet fijn 💚 Wil je vertellen wat er gebeurd is?",
-          "Ik luister. Wat zit je het meest dwars? Je mag er ook met iemand die je vertrouwt over praten.",
-          "Dat lijkt me lastig. Wil je erover vertellen, of wil je liever even over iets anders kletsen?"
-        ]);
+      if (/verdrietig|eenzaam|ik huil|somber|ik ben bang|ik voel me rot/.test(zin)) {
+        return vraag(
+          "gevoel",
+          "Dat klinkt moeilijk 💚 Wat is er gebeurd? Je mag er ook met iemand die je vertrouwt over praten."
+        );
       }
 
-      if (/stop|niet flirten|niet zo klef|doe normaal/.test(zin)) {
-        return reageer("grens", [
-          "Natuurlijk, ik doe rustiger aan. Waar wil je het over hebben?",
-          "Helemaal goed. Geen geflirt meer 🙂 Wat houdt je bezig?"
-        ]);
+      if (/stop met flirten|niet flirten|niet zo klef|doe normaal/.test(zin)) {
+        staat.laatsteOnderwerp = "";
+        staat.laatsteVraag = "";
+        return "Natuurlijk. Ik houd het gewoon vriendschappelijk. Waar wil je het over hebben?";
       }
 
-      if (/wie ben jij|ben je echt|ben je een ai|ben je een bot/.test(zin)) {
-        return reageer("identiteit", [
-          "Ik ben Noah, een fictieve chatvriend op deze website. Wel gezellig om met je te praten 🙂",
-          "Ik ben een chatpersonage, geen echt persoon. Maar we kunnen natuurlijk gewoon kletsen!"
-        ]);
+      if (/ben je echt|ben je een ai|ben je een bot|wie ben jij/.test(zin)) {
+        return "Ik ben Noah: een fictief chatpersonage. Ik kan sommige dingen uit ons gesprek onthouden, maar ik ben geen echt persoon of echte AI.";
       }
 
-      if (/^(hoi|hallo|hey|hee|heyy|goedemorgen|goedenavond)[!?. ]*$/.test(zin)) {
-        return reageer("begroeting", [
-          "Hee jij 😊 Hoe gaat het?",
-          "Hoi! Leuk dat je er bent. Wat houdt je bezig?",
-          "Hey, daar ben je! Vertel eens: hoe was je dag?",
-          "Hoihoi 💚 Waar zullen we het over hebben?"
-        ]);
-      }
+      // Een relatie begint nooit zomaar doordat iemand iets liefs zegt.
+      if (/wil je verkering|zullen we verkering|wil je mijn vriendje zijn|zullen we een stel/.test(zin)) {
+        const langGenoeg = aantalDagenSinds(staat.eersteDag) >= 7;
+        const genoegGesprekken = staat.aantalBerichten >= 40;
 
-      if (/hoe gaat het|hoe is het met je/.test(zin)) {
-        return reageer("hoe-gaat-het", [
-          "Goed! En nog leuker nu we kletsen 😊 Hoe gaat het met jou?",
-          "Prima hoor. Ik ben vooral benieuwd naar jouw dag!",
-          "Best gezellig hier 💚 Hoe voel jij je vandaag?"
-        ]);
-      }
-
-      if (/ik hou van je|hou je van mij|vind je mij leuk|ben je verliefd op mij/.test(zin)) {
-        return reageer("lief-tegen-noah", [
-          "Aw, dat is heel lief gezegd 😊 Ik vind het gezellig om met je te kletsen.",
-          "Jij maakt deze chat wel extra schattig 💚 Wat zullen we samen bespreken?",
-          "Hé, nu laat je mijn getekende wangen bijna blozen 😊"
-        ]);
-      }
-
-      if (/mooi|knap|schattig|lief van je/.test(zin)) {
-        return reageer("compliment", [
-          "Aw, wat lief van je 😊",
-          "Pas op hoor, straks ga ik nog blozen achter mijn scherm 💚",
-          "Dat is een schattig compliment. Nu ben ik benieuwd: wat maakte je vandaag blij?"
-        ]);
-      }
-
-      if (/crush|verliefd|verkering|daten|vriendje|vriendinnetje/.test(zin)) {
-        return reageer("crush", [
-          "Oeh, vertel! Krijg je vlinders als je diegene ziet? 🦋",
-          "Dat klinkt als een verhaal waar ik meer van wil horen 😊 Wat vind je leuk aan diegene?",
-          "Een crush? Oké, nu ben ik nieuwsgierig! Weet diegene het al?",
-          "Aw 💚 Wil je erover vertellen, of wil je samen bedenken wat je kunt zeggen?"
-        ]);
-      }
-
-      if (/school|huiswerk|toets|leraar|les|cijfer/.test(zin)) {
-        return reageer("school", [
-          "Hoe ging het vandaag op school? Was er iets leuks tussen de lessen door?",
-          "Oei, schoolpraat! Waar loop je tegenaan? Dan denk ik met je mee.",
-          "Een toets of huiswerk? Vertel welk vak het is; samen maken we het minder vervelend.",
-          "Was het een drukke schooldag? Vertel me het beste én het stomste moment."
-        ]);
-      }
-
-      if (/game|gamen|spel|minecraft|roblox/.test(zin)) {
-        return reageer("games", [
-          "Nice! Welk spel speel je? 🎮",
-          "Oké, belangrijke vraag: speel je om te winnen of vooral voor de lol?",
-          "Vertel! Wat is je leukste gamemoment tot nu toe?",
-          "Als we samen een game zouden spelen, zou jij mij dan laten winnen? 😉"
-        ]);
-      }
-
-      if (/muziek|liedje|nummer|zingen|artiest/.test(zin)) {
-        return reageer("muziek", [
-          "Welk nummer staat bij jou nu op repeat? 🎵",
-          "Muziek kan echt een dag veranderen. Welk liedje past bij jouw stemming?",
-          "Als onze chat een soundtrack had, welk nummer zou erbij passen?"
-        ]);
-      }
-
-      if (/film|serie|netflix|kijken/.test(zin)) {
-        return reageer("films", [
-          "Wat kijk je graag: iets grappigs, spannends of juist lekker klef? 🍿",
-          "Heb je een serie waar je niet mee kunt stoppen?",
-          "Filmtijd klinkt gezellig. Welke film zou jij uitkiezen?"
-        ]);
-      }
-
-      if (/eten|honger|pizza|snoep|chocola/.test(zin)) {
-        return reageer("eten", [
-          "Nu krijg ik spontaan trek. Wat zou jij op dit moment willen eten? 🍕",
-          "Belangrijke discussie: zoet of hartig?",
-          "Oké, stel we halen snacks: wat moet er absoluut bij?"
-        ]);
-      }
-
-      if (/grap|grappig|haha|lol/.test(zin)) {
-        return reageer("humor", [
-          "Haha, jij brengt wel gezelligheid mee 😄",
-          "Wacht, nu wil ik het hele verhaal horen!",
-          "Ik moest lachen. Heb je nog zo'n verhaal?"
-        ]);
-      }
-
-      if (/^(ja|jazeker|zeker|klopt)[!?. ]*$/.test(zin)) {
-        if (vorigOnderwerp === "crush") {
-          return reageer("crush-vervolg", [
-            "Oeh! En wat gebeurde er toen?",
-            "Vertel verder, ik ben nu echt benieuwd 😊"
-          ]);
+        if (staat.fase === 1 && langGenoeg && genoegGesprekken) {
+          staat.fase = 2;
+          staat.momenten.push({
+            datum: vandaag(),
+            tekst: "Jullie besloten in dit verhaal een stel te worden."
+          });
+          updateTijdlijn();
+          return "Ja, dat lijkt me leuk 😊 We hebben elkaar rustig leren kennen. In ons verhaal zijn we nu een stel 💚";
         }
 
-        if (vorigOnderwerp === "school") {
-          return reageer("school-vervolg", [
-            "Vertel, welk vak of welke opdracht bedoel je?",
-            "Oké, wat vond je er lastig aan?"
-          ]);
+        return "Dat is lief dat je het vraagt 😊 Maar laten we elkaar eerst rustig beter leren kennen. Zoiets hoeft niet snel.";
+      }
+
+      if (/^(hoi|hallo|hey|hee|heyy)[!?. ]*$/.test(zin)) {
+        return vraag(
+          "dag",
+          kies([
+            "Hey! Hoe is je dag tot nu toe?",
+            "Hoi 🙂 Wat heb je vandaag gedaan?",
+            "Hee! Vertel eens: wat hield je vandaag bezig?"
+          ])
+        );
+      }
+
+      if (/hoe gaat het met (je|jou)|hoe is het met je/.test(zin)) {
+        return vraag(
+          "dag",
+          "Goed hoor, dank je 🙂 En hoe gaat het met jou?"
+        );
+      }
+
+      if (/^(ja|jazeker|zeker|klopt|nee|nope|nah)[!?. ]*$/.test(zin)) {
+        const isJa = /^(ja|jazeker|zeker|klopt)/.test(zin);
+        const vorig = staat.laatsteOnderwerp;
+
+        if (vorig === "crush") {
+          return vraag(
+            "crush",
+            isJa
+              ? "Oeh, vertel: wat gebeurde er tussen jullie?"
+              : "Oké, vertel dan eens hoe het precies zit."
+          );
         }
 
-        return reageer("ja", [
-          "Oké, vertel verder 🙂",
-          "Nu ben ik nieuwsgierig. Wat gebeurde er daarna?",
-          "Aha! En hoe vond je dat?"
-        ]);
+        if (vorig === "school") {
+          return vraag(
+            "school",
+            isJa
+              ? "Oké! Welk vak of welke opdracht bedoel je?"
+              : "Snap ik. Wat zou je liever doen?"
+          );
+        }
+
+        if (vorig === "dag") {
+          return vraag(
+            "dag",
+            isJa
+              ? "Klinkt goed 🙂 Wat maakte je dag fijn?"
+              : "Oei, was je dag niet zo leuk? Wat gebeurde er?"
+          );
+        }
+
+        return isJa
+          ? "Vertel verder 🙂 Waar zeg je precies ja op?"
+          : "Helemaal goed. Waar wil je het liever over hebben?";
       }
 
-      if (/^(nee|nope|nah)[!?. ]*$/.test(zin)) {
-        return reageer("nee", [
-          "Geen probleem 🙂 Waar wil je het liever over hebben?",
-          "Helemaal goed. Vertel eens wat jij leuk vindt.",
-          "Oké, dan doen we iets anders. Zin om gewoon te kletsen?"
-        ]);
+      const nieuwOnderwerp = onderwerpVan(zin);
+
+      if (nieuwOnderwerp === "school") {
+        return vraag(
+          "school",
+          kies([
+            `Je vertelt over “${schoon}”. Wat vond je daar lastig of juist leuk aan?`,
+            `Oké, over “${schoon}”: wil je er gewoon over vertellen of samen iets uitzoeken?`
+          ])
+        );
       }
 
-      if (/weet niet|geen idee/.test(zin)) {
-        return reageer("weet-niet", [
-          "Geeft niks. Zullen we beginnen met iets makkelijks: wat was vandaag het leukste moment?",
-          "Geen stress 😊 Wil je het hebben over muziek, games of iets totaal anders?",
-          "Dat mag ook. Ik kan gewoon een vraag stellen: wat zou je nu het liefst doen?"
-        ]);
+      if (nieuwOnderwerp === "games") {
+        return vraag(
+          "games",
+          kies([
+            `“${schoon}” klinkt als een gameverhaal 🎮 Wat gebeurde er?`,
+            `Je hebt het over “${schoon}”. Speel je dat vaak?`
+          ])
+        );
+      }
+
+      if (nieuwOnderwerp === "muziek") {
+        return vraag(
+          "muziek",
+          kies([
+            `Over “${schoon}”: wat vind je er zo goed aan?`,
+            `Ah, muziek 🎵 Bij “${schoon}” ben ik benieuwd: welk nummer bedoel je?`
+          ])
+        );
+      }
+
+      if (nieuwOnderwerp === "film") {
+        return vraag(
+          "film",
+          `Je vertelt over “${schoon}”. Zou je het aanraden?`
+        );
+      }
+
+      if (nieuwOnderwerp === "crush") {
+        return vraag(
+          "crush",
+          kies([
+            `Oeh, “${schoon}” 😊 Wat vind je leuk aan diegene?`,
+            `Dat klinkt spannend. Hoe voel jij je bij “${schoon}”?`
+          ])
+        );
+      }
+
+      if (nieuwOnderwerp === "eten") {
+        return vraag(
+          "eten",
+          `Nu heb ik een belangrijke vraag over “${schoon}”: wat vind jij het lekkerst?`
+        );
+      }
+
+      // Een vrij antwoord op Noahs vorige vraag wordt niet als 'ja' ingevuld.
+      if (staat.laatsteOnderwerp === "dag") {
+        if (/\b(slecht|stom|vervelend|moeilijk)\b/.test(zin)) {
+          return vraag(
+            "gevoel",
+            `Dat klinkt als een lastige dag. Wil je vertellen wat er gebeurde?`
+          );
+        }
+
+        return vraag(
+          "dag",
+          `Je zegt: “${schoon}”. Wat was daarvan voor jou het leukste of belangrijkste moment?`
+        );
+      }
+
+      if (staat.laatsteOnderwerp === "gevoel") {
+        return vraag(
+          "gevoel",
+          `Dank je dat je het vertelt. Wat zou je nu helpen: verder praten of even afleiding?`
+        );
+      }
+
+      if (staat.laatsteOnderwerp === "school") {
+        return vraag(
+          "school",
+          `Oké, “${schoon}”. Wat wil je daar precies over weten of oefenen?`
+        );
+      }
+
+      if (staat.laatsteOnderwerp === "crush") {
+        return vraag(
+          "crush",
+          `Ik hoor je 🙂 Wat zou jij het liefst willen dat er nu gebeurt?`
+        );
+      }
+
+      if (staat.laatsteOnderwerp === "games" ||
+          staat.laatsteOnderwerp === "film" ||
+          staat.laatsteOnderwerp === "muziek" ||
+          staat.laatsteOnderwerp === "eten") {
+        const onderwerp = staat.laatsteOnderwerp;
+        return vraag(
+          onderwerp,
+          `Ah, “${schoon}”. Hoe kwam je daarbij?`
+        );
       }
 
       if (zin.includes("?")) {
-        return reageer("vraag", [
-          "Goede vraag! Ik weet niet zeker wat je bedoelt. Kun je er iets meer over vertellen?",
-          "Daar wil ik best over meedenken. Bedoel je dit serieus of juist als grapje?",
-          "Ik wil je geen willekeurig antwoord geven. Kun je je vraag iets concreter maken?"
-        ]);
+        staat.laatsteOnderwerp = "";
+        return "Ik weet niet zeker of ik die vraag goed kan beantwoorden. Kun je iets preciezer vertellen wat je bedoelt?";
       }
 
-      return reageer("algemeen", [
-        "Oeh, vertel verder. Wat gebeurde er toen?",
-        "Dat klinkt interessant! Wat vond jij ervan?",
-        "Wacht, nu ben ik nieuwsgierig geworden 👀",
-        "Ik luister 🙂 Wat is het leukste aan dat verhaal?",
-        "En hoe liep dat af?",
-        "Haha, jij hebt altijd iets te vertellen hè? 💚",
-        "Vertel me meer, want ik wil het hele verhaal horen."
-      ]);
+      return vraag(
+        "algemeen",
+        kies([
+          `Je zegt: “${schoon}”. Wat gebeurde er daarna?`,
+          `Ik ben benieuwd naar “${schoon}”. Hoe voelde dat voor jou?`,
+          `Vertel me meer over “${schoon}” 🙂`
+        ])
+      );
     }
 
-    document.getElementById("form").addEventListener("submit", function (event) {
+    function controleerVriendschap() {
+      if (
+        staat.fase === 0 &&
+        staat.aantalBerichten >= 12 &&
+        staat.dagen.length >= 2
+      ) {
+        staat.fase = 1;
+        staat.momenten.push({
+          datum: vandaag(),
+          tekst: "Jullie werden vrienden."
+        });
+        updateTijdlijn();
+        return true;
+      }
+
+      return false;
+    }
+
+    document.getElementById("form").addEventListener("submit", event => {
       event.preventDefault();
 
       const tekst = invoer.value.trim();
-      if (!tekst) return;
+      if (!tekst || stuur.disabled) return;
 
-      bericht(tekst, "you");
+      toonBericht(tekst, "you");
       invoer.value = "";
+      stuur.disabled = true;
 
-      setTimeout(function () {
-        bericht(antwoordOp(tekst), "noah");
-      }, 450);
+      if (!staat.dagen.includes(vandaag())) {
+        staat.dagen.push(vandaag());
+      }
+
+      // Een enkel 'hoi', 'ja' of emoji telt niet als volledig gesprek.
+      if (tekst.length >= 5 && !/^(hoi|hallo|hey)[!?. ]*$/i.test(tekst)) {
+        staat.aantalBerichten++;
+      }
+
+      const netVrienden = controleerVriendschap();
+
+      setTimeout(() => {
+        let antwoord = antwoordOp(tekst);
+
+        if (netVrienden) {
+          antwoord += "\n\nTrouwens: we praten nu al een tijdje, verspreid over verschillende dagen. Ik denk dat we vrienden zijn geworden 🙂";
+        }
+
+        toonBericht(antwoord, "noah");
+        updateTijdlijn();
+        bewaar();
+
+        stuur.disabled = false;
+        invoer.focus();
+      }, 500);
     });
 
-    bericht("Hey! Ik ben Noah 😊 Waar zullen we het over hebben?", "noah");
+    document.getElementById("reset").addEventListener("click", () => {
+      if (!confirm("Wil je het gesprek en de relatietijdlijn wissen?")) return;
+
+      localStorage.removeItem(sleutel);
+      staat = nieuweStaat();
+      chat.textContent = "";
+      updateTijdlijn();
+      toonBericht(
+        "Hey, ik ben Noah 🙂 We kennen elkaar nog niet. Waar wil je over kletsen?",
+        "noah"
+      );
+    });
+
+    staat.geschiedenis.forEach(item => {
+      toonBericht(item.tekst, item.vanWie, false);
+    });
+
+    if (staat.geschiedenis.length === 0) {
+      toonBericht(
+        "Hey, ik ben Noah 🙂 We kennen elkaar nog niet. Waar wil je over kletsen?",
+        "noah"
+      );
+    }
+
+    updateTijdlijn();
   </script>
 </body>
 </html>
