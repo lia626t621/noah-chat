@@ -126,6 +126,7 @@
     }
 
     .noah { background: #275b5b; }
+
     .you {
       margin-left: auto;
       background: #79dfc5;
@@ -187,6 +188,10 @@
     const chat = document.getElementById("chat");
     const invoer = document.getElementById("invoer");
 
+    let vorigOnderwerp = "";
+    let vorigAntwoord = "";
+    const gebruikteAntwoorden = {};
+
     function bericht(tekst, vanWie) {
       const vak = document.createElement("div");
       vak.className = "message " + vanWie;
@@ -195,36 +200,215 @@
       chat.scrollTop = chat.scrollHeight;
     }
 
+    // Kiest afwisselend uit de reacties van één onderwerp.
+    function kies(onderwerp, reacties) {
+      if (!gebruikteAntwoorden[onderwerp]) {
+        gebruikteAntwoorden[onderwerp] = [];
+      }
+
+      let opties = reacties.filter(reactie =>
+        !gebruikteAntwoorden[onderwerp].includes(reactie) &&
+        reactie !== vorigAntwoord
+      );
+
+      if (opties.length === 0) {
+        gebruikteAntwoorden[onderwerp] = [];
+        opties = reacties.filter(reactie => reactie !== vorigAntwoord);
+      }
+
+      if (opties.length === 0) opties = reacties;
+
+      const antwoord = opties[Math.floor(Math.random() * opties.length)];
+      gebruikteAntwoorden[onderwerp].push(antwoord);
+      vorigAntwoord = antwoord;
+      return antwoord;
+    }
+
+    function reageer(onderwerp, reacties) {
+      vorigOnderwerp = onderwerp;
+      return kies(onderwerp, reacties);
+    }
+
     function antwoordOp(tekst) {
-      const zin = tekst.toLowerCase();
+      const zin = tekst.toLowerCase().trim();
 
-      if (/verdrietig|eenzaam|huil|rot/.test(zin)) {
-        return "Dat klinkt moeilijk. Wil je vertellen wat er is? Praat er ook over met iemand die je vertrouwt. 💚";
+      // Serieuze berichten krijgen altijd voorrang op speelse reacties.
+      if (/ik wil dood|zelfmoord|mezelf pijn doen|zelfbeschadig/.test(zin)) {
+        return reageer("veiligheid", [
+          "Het klinkt alsof je het heel zwaar hebt. Blijf hier niet alleen mee: vertel het nu aan een volwassene die je vertrouwt.",
+          "Dit is belangrijk. Zoek alsjeblieft meteen iemand in je omgeving die je vertrouwt en vertel wat er speelt."
+        ]);
       }
-      if (/hoi|hallo|hey/.test(zin)) {
-        return "Hey! Leuk dat je er bent 😊 Hoe was je dag?";
+
+      if (/verdrietig|eenzaam|huil|rot|niet goed|somber|bang/.test(zin)) {
+        return reageer("verdriet", [
+          "Ach, dat klinkt niet fijn 💚 Wil je vertellen wat er gebeurd is?",
+          "Ik luister. Wat zit je het meest dwars? Je mag er ook met iemand die je vertrouwt over praten.",
+          "Dat lijkt me lastig. Wil je erover vertellen, of wil je liever even over iets anders kletsen?"
+        ]);
       }
-      if (/school|huiswerk|toets/.test(zin)) {
-        return "Hoe ging het op school? Als je wilt, kunnen we samen iets oefenen.";
+
+      if (/stop|niet flirten|niet zo klef|doe normaal/.test(zin)) {
+        return reageer("grens", [
+          "Natuurlijk, ik doe rustiger aan. Waar wil je het over hebben?",
+          "Helemaal goed. Geen geflirt meer 🙂 Wat houdt je bezig?"
+        ]);
       }
-      if (/crush|verliefd|lief|vriendje/.test(zin)) {
-        return "Aw, wat lief gezegd 😊 Vertel, wat maakt iemand voor jou leuk?";
+
+      if (/wie ben jij|ben je echt|ben je een ai|ben je een bot/.test(zin)) {
+        return reageer("identiteit", [
+          "Ik ben Noah, een fictieve chatvriend op deze website. Wel gezellig om met je te praten 🙂",
+          "Ik ben een chatpersonage, geen echt persoon. Maar we kunnen natuurlijk gewoon kletsen!"
+        ]);
       }
-      if (/game|gamen|spel/.test(zin)) {
-        return "Leuk! Welke game speel je graag?";
+
+      if (/^(hoi|hallo|hey|hee|heyy|goedemorgen|goedenavond)[!?. ]*$/.test(zin)) {
+        return reageer("begroeting", [
+          "Hee jij 😊 Hoe gaat het?",
+          "Hoi! Leuk dat je er bent. Wat houdt je bezig?",
+          "Hey, daar ben je! Vertel eens: hoe was je dag?",
+          "Hoihoi 💚 Waar zullen we het over hebben?"
+        ]);
       }
+
+      if (/hoe gaat het|hoe is het met je/.test(zin)) {
+        return reageer("hoe-gaat-het", [
+          "Goed! En nog leuker nu we kletsen 😊 Hoe gaat het met jou?",
+          "Prima hoor. Ik ben vooral benieuwd naar jouw dag!",
+          "Best gezellig hier 💚 Hoe voel jij je vandaag?"
+        ]);
+      }
+
+      if (/ik hou van je|hou je van mij|vind je mij leuk|ben je verliefd op mij/.test(zin)) {
+        return reageer("lief-tegen-noah", [
+          "Aw, dat is heel lief gezegd 😊 Ik vind het gezellig om met je te kletsen.",
+          "Jij maakt deze chat wel extra schattig 💚 Wat zullen we samen bespreken?",
+          "Hé, nu laat je mijn getekende wangen bijna blozen 😊"
+        ]);
+      }
+
+      if (/mooi|knap|schattig|lief van je/.test(zin)) {
+        return reageer("compliment", [
+          "Aw, wat lief van je 😊",
+          "Pas op hoor, straks ga ik nog blozen achter mijn scherm 💚",
+          "Dat is een schattig compliment. Nu ben ik benieuwd: wat maakte je vandaag blij?"
+        ]);
+      }
+
+      if (/crush|verliefd|verkering|daten|vriendje|vriendinnetje/.test(zin)) {
+        return reageer("crush", [
+          "Oeh, vertel! Krijg je vlinders als je diegene ziet? 🦋",
+          "Dat klinkt als een verhaal waar ik meer van wil horen 😊 Wat vind je leuk aan diegene?",
+          "Een crush? Oké, nu ben ik nieuwsgierig! Weet diegene het al?",
+          "Aw 💚 Wil je erover vertellen, of wil je samen bedenken wat je kunt zeggen?"
+        ]);
+      }
+
+      if (/school|huiswerk|toets|leraar|les|cijfer/.test(zin)) {
+        return reageer("school", [
+          "Hoe ging het vandaag op school? Was er iets leuks tussen de lessen door?",
+          "Oei, schoolpraat! Waar loop je tegenaan? Dan denk ik met je mee.",
+          "Een toets of huiswerk? Vertel welk vak het is; samen maken we het minder vervelend.",
+          "Was het een drukke schooldag? Vertel me het beste én het stomste moment."
+        ]);
+      }
+
+      if (/game|gamen|spel|minecraft|roblox/.test(zin)) {
+        return reageer("games", [
+          "Nice! Welk spel speel je? 🎮",
+          "Oké, belangrijke vraag: speel je om te winnen of vooral voor de lol?",
+          "Vertel! Wat is je leukste gamemoment tot nu toe?",
+          "Als we samen een game zouden spelen, zou jij mij dan laten winnen? 😉"
+        ]);
+      }
+
+      if (/muziek|liedje|nummer|zingen|artiest/.test(zin)) {
+        return reageer("muziek", [
+          "Welk nummer staat bij jou nu op repeat? 🎵",
+          "Muziek kan echt een dag veranderen. Welk liedje past bij jouw stemming?",
+          "Als onze chat een soundtrack had, welk nummer zou erbij passen?"
+        ]);
+      }
+
+      if (/film|serie|netflix|kijken/.test(zin)) {
+        return reageer("films", [
+          "Wat kijk je graag: iets grappigs, spannends of juist lekker klef? 🍿",
+          "Heb je een serie waar je niet mee kunt stoppen?",
+          "Filmtijd klinkt gezellig. Welke film zou jij uitkiezen?"
+        ]);
+      }
+
+      if (/eten|honger|pizza|snoep|chocola/.test(zin)) {
+        return reageer("eten", [
+          "Nu krijg ik spontaan trek. Wat zou jij op dit moment willen eten? 🍕",
+          "Belangrijke discussie: zoet of hartig?",
+          "Oké, stel we halen snacks: wat moet er absoluut bij?"
+        ]);
+      }
+
+      if (/grap|grappig|haha|lol/.test(zin)) {
+        return reageer("humor", [
+          "Haha, jij brengt wel gezelligheid mee 😄",
+          "Wacht, nu wil ik het hele verhaal horen!",
+          "Ik moest lachen. Heb je nog zo'n verhaal?"
+        ]);
+      }
+
+      if (/^(ja|jazeker|zeker|klopt)[!?. ]*$/.test(zin)) {
+        if (vorigOnderwerp === "crush") {
+          return reageer("crush-vervolg", [
+            "Oeh! En wat gebeurde er toen?",
+            "Vertel verder, ik ben nu echt benieuwd 😊"
+          ]);
+        }
+
+        if (vorigOnderwerp === "school") {
+          return reageer("school-vervolg", [
+            "Vertel, welk vak of welke opdracht bedoel je?",
+            "Oké, wat vond je er lastig aan?"
+          ]);
+        }
+
+        return reageer("ja", [
+          "Oké, vertel verder 🙂",
+          "Nu ben ik nieuwsgierig. Wat gebeurde er daarna?",
+          "Aha! En hoe vond je dat?"
+        ]);
+      }
+
+      if (/^(nee|nope|nah)[!?. ]*$/.test(zin)) {
+        return reageer("nee", [
+          "Geen probleem 🙂 Waar wil je het liever over hebben?",
+          "Helemaal goed. Vertel eens wat jij leuk vindt.",
+          "Oké, dan doen we iets anders. Zin om gewoon te kletsen?"
+        ]);
+      }
+
+      if (/weet niet|geen idee/.test(zin)) {
+        return reageer("weet-niet", [
+          "Geeft niks. Zullen we beginnen met iets makkelijks: wat was vandaag het leukste moment?",
+          "Geen stress 😊 Wil je het hebben over muziek, games of iets totaal anders?",
+          "Dat mag ook. Ik kan gewoon een vraag stellen: wat zou je nu het liefst doen?"
+        ]);
+      }
+
       if (zin.includes("?")) {
-        return "Goede vraag! Vertel me iets meer, dan denk ik met je mee.";
+        return reageer("vraag", [
+          "Goede vraag! Ik weet niet zeker wat je bedoelt. Kun je er iets meer over vertellen?",
+          "Daar wil ik best over meedenken. Bedoel je dit serieus of juist als grapje?",
+          "Ik wil je geen willekeurig antwoord geven. Kun je je vraag iets concreter maken?"
+        ]);
       }
 
-      const reacties = [
-        "Vertel verder, ik ben benieuwd 🙂",
-        "En hoe voelde dat voor jou?",
-        "Haha, echt? Wat gebeurde er daarna?",
-        "Ik vind het gezellig om met je te praten 💚"
-      ];
-
-      return reacties[Math.floor(Math.random() * reacties.length)];
+      return reageer("algemeen", [
+        "Oeh, vertel verder. Wat gebeurde er toen?",
+        "Dat klinkt interessant! Wat vond jij ervan?",
+        "Wacht, nu ben ik nieuwsgierig geworden 👀",
+        "Ik luister 🙂 Wat is het leukste aan dat verhaal?",
+        "En hoe liep dat af?",
+        "Haha, jij hebt altijd iets te vertellen hè? 💚",
+        "Vertel me meer, want ik wil het hele verhaal horen."
+      ]);
     }
 
     document.getElementById("form").addEventListener("submit", function (event) {
@@ -238,10 +422,10 @@
 
       setTimeout(function () {
         bericht(antwoordOp(tekst), "noah");
-      }, 500);
+      }, 450);
     });
 
-    bericht("Hey! Ik ben Noah 🙂 Hoe was je dag?", "noah");
+    bericht("Hey! Ik ben Noah 😊 Waar zullen we het over hebben?", "noah");
   </script>
 </body>
 </html>
