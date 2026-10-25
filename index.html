@@ -29,65 +29,78 @@
     header {
       display: flex;
       align-items: center;
-      gap: 14px;
+      gap: 12px;
       padding: 15px;
       background: #123036;
     }
 
     .avatar {
-      width: 65px;
-      height: 65px;
-      flex: none;
       display: grid;
       place-items: center;
-      border-radius: 50%;
+      width: 62px;
+      height: 62px;
+      flex: none;
       border: 3px solid #65dec7;
+      border-radius: 50%;
       background: #90d9ca;
-      font-size: 37px;
+      font-size: 35px;
     }
 
-    header h1 { margin: 0 0 4px; font-size: 21px; }
+    h1 { margin: 0 0 4px; font-size: 21px; }
     header p { margin: 0; color: #b6d7d0; font-size: 12px; }
 
-    .timeline {
-      padding: 11px 15px;
+    .relationship {
+      padding: 14px;
       background: #19444a;
       border-bottom: 1px solid #397d78;
     }
 
-    .timeline-top {
+    .relationship-top,
+    .stages {
       display: flex;
       justify-content: space-between;
-      gap: 10px;
-      align-items: center;
-      font-size: 13px;
+      gap: 7px;
     }
 
-    .steps {
-      display: flex;
-      gap: 6px;
-      margin-top: 9px;
-    }
+    .relationship-top { font-size: 13px; }
 
-    .step {
+    .stages { margin: 12px 0 10px; }
+
+    .stage {
       flex: 1;
       padding: 7px 3px;
-      border-radius: 9px;
+      border-radius: 8px;
       background: #275b5b;
       color: #b6d7d0;
       text-align: center;
       font-size: 12px;
     }
 
-    .step.active {
+    .stage.active {
       background: #79dfc5;
       color: #10332d;
       font-weight: bold;
     }
 
-    #tijdlijnTekst {
+    .bar {
+      height: 12px;
+      overflow: hidden;
+      border-radius: 99px;
+      background: #0e2d31;
+      border: 1px solid #397d78;
+    }
+
+    #barFill {
+      width: 0%;
+      height: 100%;
+      border-radius: 99px;
+      background: linear-gradient(90deg, #51bba9, #a5ffe0);
+      transition: width .4s ease;
+    }
+
+    #progressText {
       margin: 8px 0 0;
-      color: #b6d7d0;
+      color: #c5e1d9;
       font-size: 12px;
       line-height: 1.4;
     }
@@ -99,10 +112,10 @@
     }
 
     .message {
-      max-width: 84%;
       width: fit-content;
-      padding: 11px 14px;
+      max-width: 84%;
       margin-bottom: 11px;
+      padding: 11px 14px;
       border-radius: 17px;
       line-height: 1.4;
       overflow-wrap: anywhere;
@@ -127,38 +140,38 @@
     input {
       flex: 1;
       min-width: 0;
+      padding: 12px;
       border: 0;
       border-radius: 12px;
-      padding: 12px;
       font-size: 16px;
     }
 
-    button {
+    form button {
+      padding: 0 16px;
       border: 0;
       border-radius: 12px;
-      padding: 0 14px;
       background: #79dfc5;
       color: #10332d;
       font-weight: bold;
       cursor: pointer;
     }
 
-    button:disabled { opacity: .6; cursor: wait; }
+    form button:disabled { opacity: .6; }
 
-    .footer {
+    footer {
       padding: 0 12px 10px;
       background: #123036;
       color: #b6d7d0;
-      font-size: 11px;
       text-align: center;
+      font-size: 11px;
     }
 
-    .footer button {
-      padding: 0;
+    footer button {
+      border: 0;
       background: none;
       color: #b6d7d0;
       text-decoration: underline;
-      font-size: 11px;
+      cursor: pointer;
     }
   </style>
 </head>
@@ -168,408 +181,465 @@
       <div class="avatar" aria-hidden="true">🙂</div>
       <div>
         <h1>Noah 💚</h1>
-        <p>Fictieve chatvriend • 13 jaar • geen echte AI</p>
+        <p>Fictief chatpersonage • 13 jaar • geen echte AI</p>
       </div>
     </header>
 
-    <section class="timeline" aria-label="Relatietijdlijn">
-      <div class="timeline-top">
+    <section class="relationship" aria-label="Relatietijdlijn">
+      <div class="relationship-top">
         <strong>Onze tijdlijn</strong>
-        <span id="status">Vreemden</span>
+        <strong id="status">Vreemden</strong>
       </div>
-      <div class="steps">
-        <span class="step" id="stap0">Vreemden</span>
-        <span class="step" id="stap1">Vrienden</span>
-        <span class="step" id="stap2">Een stel</span>
+
+      <div class="stages">
+        <span class="stage" id="stage0">Vreemden</span>
+        <span class="stage" id="stage1">Vrienden</span>
+        <span class="stage" id="stage2">Een stel</span>
       </div>
-      <p id="tijdlijnTekst"></p>
+
+      <div
+        class="bar"
+        id="progressBar"
+        role="progressbar"
+        aria-label="Voortgang naar de volgende fase"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow="0"
+      >
+        <div id="barFill"></div>
+      </div>
+
+      <p id="progressText"></p>
     </section>
 
     <div id="chat" aria-live="polite"></div>
 
     <form id="form">
-      <input id="invoer" placeholder="Typ hier iets..." autocomplete="off" maxlength="400">
+      <input
+        id="invoer"
+        placeholder="Typ hier iets..."
+        autocomplete="off"
+        maxlength="500"
+        aria-label="Jouw bericht"
+      >
       <button id="stuur" type="submit">Stuur</button>
     </form>
 
-    <div class="footer">
-      Gesprek wordt alleen in deze browser bewaard.
+    <footer>
+      Gesprek wordt in deze browser bewaard.
       <button id="reset" type="button">Wis gesprek</button>
-    </div>
+    </footer>
   </main>
 
   <script>
-    const sleutel = "noah-chat-versie-2";
+    const KEY = "noah-chat-met-tijdbalk-v1";
+
     const chat = document.getElementById("chat");
     const invoer = document.getElementById("invoer");
     const stuur = document.getElementById("stuur");
 
-    function vandaag() {
-      const nu = new Date();
+    function today() {
+      const now = new Date();
       return [
-        nu.getFullYear(),
-        String(nu.getMonth() + 1).padStart(2, "0"),
-        String(nu.getDate()).padStart(2, "0")
+        now.getFullYear(),
+        String(now.getMonth() + 1).padStart(2, "0"),
+        String(now.getDate()).padStart(2, "0")
       ].join("-");
     }
 
-    function nieuweStaat() {
+    function newState() {
       return {
-        fase: 0,
-        eersteDag: vandaag(),
-        dagen: [],
-        aantalBerichten: 0,
-        laatsteOnderwerp: "",
-        laatsteVraag: "",
-        vorigAntwoord: "",
-        geschiedenis: [],
-        momenten: [
-          { datum: vandaag(), tekst: "Jullie ontmoetten elkaar." }
-        ]
+        phase: 0,
+        firstDay: today(),
+        days: [],
+        meaningfulMessages: 0,
+        topic: "",
+        question: "",
+        lastReply: "",
+        messages: []
       };
     }
 
-    let staat;
+    let state;
 
     try {
-      staat = JSON.parse(localStorage.getItem(sleutel)) || nieuweStaat();
-      if (!Array.isArray(staat.geschiedenis) ||
-          !Array.isArray(staat.dagen) ||
-          !Array.isArray(staat.momenten)) {
-        staat = nieuweStaat();
+      state = JSON.parse(localStorage.getItem(KEY)) || newState();
+
+      if (
+        !Array.isArray(state.days) ||
+        !Array.isArray(state.messages) ||
+        ![0, 1, 2].includes(state.phase)
+      ) {
+        state = newState();
       }
     } catch {
-      staat = nieuweStaat();
+      state = newState();
     }
 
-    function bewaar() {
+    function save() {
       try {
-        localStorage.setItem(sleutel, JSON.stringify(staat));
+        localStorage.setItem(KEY, JSON.stringify(state));
       } catch {
-        // De chat blijft werken als de browser geen opslag toestaat.
+        // De chat blijft werken als opslag niet beschikbaar is.
       }
     }
 
-    function toonBericht(tekst, vanWie, opslaan = true) {
-      const vak = document.createElement("div");
-      vak.className = "message " + vanWie;
-      vak.textContent = tekst;
-      chat.appendChild(vak);
+    function showMessage(text, sender, store = true) {
+      const bubble = document.createElement("div");
+      bubble.className = "message " + sender;
+      bubble.textContent = text;
+      chat.appendChild(bubble);
       chat.scrollTop = chat.scrollHeight;
 
-      if (opslaan) {
-        staat.geschiedenis.push({ tekst, vanWie });
-        staat.geschiedenis = staat.geschiedenis.slice(-100);
-        bewaar();
+      if (store) {
+        state.messages.push({ text, sender });
+        state.messages = state.messages.slice(-120);
+        save();
       }
     }
 
-    function aantalDagenSinds(startdatum) {
-      const start = new Date(startdatum + "T12:00:00");
-      const nu = new Date(vandaag() + "T12:00:00");
-      return Math.max(0, Math.round((nu - start) / 86400000));
+    function daysSince(date) {
+      const start = new Date(date + "T12:00:00");
+      const end = new Date(today() + "T12:00:00");
+      return Math.max(0, Math.round((end - start) / 86400000));
     }
 
-    function updateTijdlijn() {
-      const namen = ["Vreemden", "Vrienden", "Een stel"];
-      document.getElementById("status").textContent = namen[staat.fase];
+    function updateTimeline() {
+      const names = ["Vreemden", "Vrienden", "Een stel"];
+      document.getElementById("status").textContent = names[state.phase];
 
       for (let i = 0; i < 3; i++) {
-        document.getElementById("stap" + i)
-          .classList.toggle("active", i <= staat.fase);
+        document.getElementById("stage" + i)
+          .classList.toggle("active", i <= state.phase);
       }
 
-      const laatste = staat.momenten.at(-1);
-      const gebeurtenis = laatste
-        ? laatste.datum + ": " + laatste.tekst
-        : "";
+      let percentage;
+      let explanation;
 
-      let uitleg = "";
+      if (state.phase === 0) {
+        const messages = Math.min(state.meaningfulMessages / 12, 1);
+        const days = Math.min(state.days.length / 2, 1);
 
-      if (staat.fase === 0) {
-        uitleg = "Jullie leren elkaar rustig kennen.";
-      } else if (staat.fase === 1) {
-        uitleg = "Jullie zijn vrienden. Een relatie ontstaat niet automatisch.";
+        percentage = Math.round(((messages + days) / 2) * 100);
+        explanation =
+          `${state.meaningfulMessages}/12 gesprekkenberichten • ` +
+          `${state.days.length}/2 verschillende dagen tot vriendschap.`;
+      } else if (state.phase === 1) {
+        const messages = Math.min(state.meaningfulMessages / 40, 1);
+        const days = Math.min(daysSince(state.firstDay) / 7, 1);
+
+        percentage = Math.round(((messages + days) / 2) * 100);
+        explanation =
+          `${state.meaningfulMessages}/40 gesprekkenberichten • ` +
+          `${daysSince(state.firstDay)}/7 dagen. ` +
+          `Bij 100% worden jullie niet automatisch een stel: ` +
+          `dat kan alleen als jij het vraagt.`;
       } else {
-        uitleg = "Jullie zijn in dit fictieve verhaal een stel.";
+        percentage = 100;
+        explanation = "Jullie zijn in dit fictieve verhaal een stel. 💚";
       }
 
-      document.getElementById("tijdlijnTekst").textContent =
-        gebeurtenis + " " + uitleg;
+      document.getElementById("barFill").style.width = percentage + "%";
+      document.getElementById("progressBar")
+        .setAttribute("aria-valuenow", percentage);
+      document.getElementById("progressText").textContent = explanation;
     }
 
-    function kies(opties) {
-      const anders = opties.filter(tekst => tekst !== staat.vorigAntwoord);
-      const lijst = anders.length ? anders : opties;
-      const antwoord = lijst[Math.floor(Math.random() * lijst.length)];
-      staat.vorigAntwoord = antwoord;
-      return antwoord;
+    function pick(options) {
+      const choices = options.filter(item => item !== state.lastReply);
+      const list = choices.length ? choices : options;
+      const reply = list[Math.floor(Math.random() * list.length)];
+      state.lastReply = reply;
+      return reply;
     }
 
-    function kort(tekst) {
-      const schoon = tekst.replace(/\s+/g, " ").trim();
-      return schoon.length > 65
-        ? schoon.slice(0, 62).trimEnd() + "..."
-        : schoon;
+    function sayAndAsk(topic, question, reply) {
+      state.topic = topic;
+      state.question = question;
+      return reply;
     }
 
-    function vraag(onderwerp, tekst) {
-      staat.laatsteOnderwerp = onderwerp;
-      staat.laatsteVraag = tekst;
-      return tekst;
+    function shortened(text) {
+      const clean = text.replace(/\s+/g, " ").trim();
+      return clean.length > 55 ? clean.slice(0, 52) + "..." : clean;
     }
 
-    function onderwerpVan(zin) {
-      if (/\b(toets|huiswerk|school|les|cijfer|leraar|wiskunde)\b/.test(zin))
+    function subjectOf(text) {
+      if (/\b(toets|school|huiswerk|leraar|cijfer|wiskunde|les)\b/.test(text))
         return "school";
 
-      if (/\b(game|gamen|spel|minecraft|roblox)\b/.test(zin))
+      if (/\b(gamen|game|spel|minecraft|roblox)\b/.test(text))
         return "games";
 
-      if (/\b(muziek|liedje|nummer|zingen|artiest)\b/.test(zin))
+      if (/\b(muziek|liedje|nummer|artiest)\b/.test(text))
         return "muziek";
 
-      if (/\b(film|serie|bioscoop)\b/.test(zin))
-        return "film";
-
-      if (/\b(crush|verliefd|verkering|daten)\b/.test(zin))
+      if (/\b(crush|verliefd|daten|verkering)\b/.test(text))
         return "crush";
 
-      if (/\b(eten|honger|pizza|snack)\b/.test(zin))
-        return "eten";
+      if (/\b(film|serie|bioscoop)\b/.test(text))
+        return "film";
+
+      if (/\b(vriend|vriendin|ruzie)\b/.test(text))
+        return "vrienden";
 
       return "";
     }
 
-    function antwoordOp(tekst) {
-      const zin = tekst.toLowerCase().trim();
-      const schoon = kort(tekst);
+    function replyTo(original) {
+      const text = original.toLowerCase().trim();
+      const quote = shortened(original);
 
-      // Serieuze berichten krijgen voorrang op alle speelse reacties.
-      if (/ik wil dood|zelfmoord|mezelf pijn doen|zelfbeschadig/.test(zin)) {
-        staat.laatsteOnderwerp = "";
-        return "Het klinkt alsof je het heel zwaar hebt. Vertel dit alsjeblieft nu aan een volwassene die je vertrouwt. Ben je direct in gevaar? Bel dan de hulpdiensten.";
+      // Belangrijke en persoonlijke berichten gaan altijd voor.
+      if (
+        /ik wil dood|zelfmoord|mezelf pijn doen|zelfbeschadig/.test(text)
+      ) {
+        state.topic = "gevoel";
+        return "Het klinkt alsof je het heel zwaar hebt. Vertel dit alsjeblieft meteen aan een volwassene die je vertrouwt. Ben je direct in gevaar? Bel de hulpdiensten.";
       }
 
-      if (/verdrietig|eenzaam|ik huil|somber|ik ben bang|ik voel me rot/.test(zin)) {
-        return vraag(
+      if (
+        /stop met flirten|niet flirten|niet zo klef|geen verkering|ik wil stoppen|het is uit/.test(text)
+      ) {
+        if (state.phase === 2 && /ik wil stoppen|het is uit/.test(text)) {
+          state.phase = 1;
+          state.topic = "";
+          return "Oké. Ik respecteer dat. In ons verhaal zijn we weer vrienden, als jij dat wilt.";
+        }
+
+        state.topic = "";
+        return "Natuurlijk. Ik respecteer wat je zegt en houd het gewoon vriendschappelijk.";
+      }
+
+      if (/verdrietig|eenzaam|somber|ik huil|ik ben bang|ik voel me rot/.test(text)) {
+        return sayAndAsk(
           "gevoel",
-          "Dat klinkt moeilijk 💚 Wat is er gebeurd? Je mag er ook met iemand die je vertrouwt over praten."
+          "wat is er gebeurd",
+          "Dat klinkt moeilijk 💚 Wil je vertellen wat er gebeurd is? Je kunt ook praten met iemand die je vertrouwt."
         );
       }
 
-      if (/stop met flirten|niet flirten|niet zo klef|doe normaal/.test(zin)) {
-        staat.laatsteOnderwerp = "";
-        staat.laatsteVraag = "";
-        return "Natuurlijk. Ik houd het gewoon vriendschappelijk. Waar wil je het over hebben?";
+      if (/ben je echt|ben je een ai|ben je een bot|wie ben jij/.test(text)) {
+        return "Ik ben Noah, een fictief chatpersonage. Ik ben geen echt persoon en begrijp nog niet alles wat je typt.";
       }
 
-      if (/ben je echt|ben je een ai|ben je een bot|wie ben jij/.test(zin)) {
-        return "Ik ben Noah: een fictief chatpersonage. Ik kan sommige dingen uit ons gesprek onthouden, maar ik ben geen echt persoon of echte AI.";
-      }
+      // Eerst reageren op een vraag over verkering, vóór andere onderwerpen.
+      const asksRelationship =
+        /wil je (met mij )?verkering|zullen we (verkering|een stel)|wil je mijn vriendje zijn|wil je mijn partner zijn|ik wil verkering met (je|jou)|kunnen we (verkering|een stel)/.test(text);
 
-      // Een relatie begint nooit zomaar doordat iemand iets liefs zegt.
-      if (/wil je verkering|zullen we verkering|wil je mijn vriendje zijn|zullen we een stel/.test(zin)) {
-        const langGenoeg = aantalDagenSinds(staat.eersteDag) >= 7;
-        const genoegGesprekken = staat.aantalBerichten >= 40;
+      if (asksRelationship) {
+        state.topic = "relatie";
 
-        if (staat.fase === 1 && langGenoeg && genoegGesprekken) {
-          staat.fase = 2;
-          staat.momenten.push({
-            datum: vandaag(),
-            tekst: "Jullie besloten in dit verhaal een stel te worden."
-          });
-          updateTijdlijn();
-          return "Ja, dat lijkt me leuk 😊 We hebben elkaar rustig leren kennen. In ons verhaal zijn we nu een stel 💚";
+        if (state.phase === 2) {
+          return "Haha, in ons verhaal hebben we al verkering 💚";
         }
 
-        return "Dat is lief dat je het vraagt 😊 Maar laten we elkaar eerst rustig beter leren kennen. Zoiets hoeft niet snel.";
+        if (state.phase === 0) {
+          return "Ik snap wat je vraagt, en dat is lief 😊 Maar we kennen elkaar nog maar net. Laten we eerst rustig vrienden worden.";
+        }
+
+        if (
+          state.meaningfulMessages < 40 ||
+          daysSince(state.firstDay) < 7
+        ) {
+          return "Ik snap je vraag echt 😊 We zijn vrienden, maar laten we nog wat langer de tijd nemen om elkaar te leren kennen. Je kunt op de balk zien hoe ver het verhaal is.";
+        }
+
+        state.phase = 2;
+        return "Ja, dat lijkt me leuk 😊 We hebben rustig de tijd genomen. In ons fictieve verhaal zijn we nu een stel 💚";
       }
 
-      if (/^(hoi|hallo|hey|hee|heyy)[!?. ]*$/.test(zin)) {
-        return vraag(
+      if (/hou je van me|hou je van mij|vind je mij leuk/.test(text)) {
+        return state.phase === 2
+          ? "Ik vind het fijn om in ons verhaal samen te zijn 💚 Wat vind jij leuk aan onze gesprekken?"
+          : "Ik vind het gezellig om met je te praten 😊 Maar we hoeven niets te overhaasten.";
+      }
+
+      if (/^(hoi|hallo|hey|hee|heyy)[!?. ]*$/.test(text)) {
+        return sayAndAsk(
           "dag",
-          kies([
-            "Hey! Hoe is je dag tot nu toe?",
-            "Hoi 🙂 Wat heb je vandaag gedaan?",
-            "Hee! Vertel eens: wat hield je vandaag bezig?"
+          "hoe was je dag",
+          pick([
+            "Hey 🙂 Hoe was je dag?",
+            "Hoi! Wat heb je vandaag gedaan?",
+            "Hee, leuk dat je er bent. Hoe gaat het?"
           ])
         );
       }
 
-      if (/hoe gaat het met (je|jou)|hoe is het met je/.test(zin)) {
-        return vraag(
+      if (/hoe gaat het met (je|jou)|hoe is het met je/.test(text)) {
+        return sayAndAsk(
           "dag",
-          "Goed hoor, dank je 🙂 En hoe gaat het met jou?"
+          "hoe gaat het met jou",
+          "Goed hoor 🙂 En hoe gaat het met jou?"
         );
       }
 
-      if (/^(ja|jazeker|zeker|klopt|nee|nope|nah)[!?. ]*$/.test(zin)) {
-        const isJa = /^(ja|jazeker|zeker|klopt)/.test(zin);
-        const vorig = staat.laatsteOnderwerp;
+      // Als jij antwoord geeft op Noahs vraag, gebruikt hij die context.
+      if (/^(ja|jazeker|zeker|klopt|nee|nope|nah)[!?. ]*$/.test(text)) {
+        const yes = /^(ja|jazeker|zeker|klopt)/.test(text);
 
-        if (vorig === "crush") {
-          return vraag(
-            "crush",
-            isJa
-              ? "Oeh, vertel: wat gebeurde er tussen jullie?"
-              : "Oké, vertel dan eens hoe het precies zit."
-          );
-        }
-
-        if (vorig === "school") {
-          return vraag(
-            "school",
-            isJa
-              ? "Oké! Welk vak of welke opdracht bedoel je?"
-              : "Snap ik. Wat zou je liever doen?"
-          );
-        }
-
-        if (vorig === "dag") {
-          return vraag(
-            "dag",
-            isJa
-              ? "Klinkt goed 🙂 Wat maakte je dag fijn?"
-              : "Oei, was je dag niet zo leuk? Wat gebeurde er?"
-          );
-        }
-
-        return isJa
-          ? "Vertel verder 🙂 Waar zeg je precies ja op?"
-          : "Helemaal goed. Waar wil je het liever over hebben?";
-      }
-
-      const nieuwOnderwerp = onderwerpVan(zin);
-
-      if (nieuwOnderwerp === "school") {
-        return vraag(
-          "school",
-          kies([
-            `Je vertelt over “${schoon}”. Wat vond je daar lastig of juist leuk aan?`,
-            `Oké, over “${schoon}”: wil je er gewoon over vertellen of samen iets uitzoeken?`
-          ])
-        );
-      }
-
-      if (nieuwOnderwerp === "games") {
-        return vraag(
-          "games",
-          kies([
-            `“${schoon}” klinkt als een gameverhaal 🎮 Wat gebeurde er?`,
-            `Je hebt het over “${schoon}”. Speel je dat vaak?`
-          ])
-        );
-      }
-
-      if (nieuwOnderwerp === "muziek") {
-        return vraag(
-          "muziek",
-          kies([
-            `Over “${schoon}”: wat vind je er zo goed aan?`,
-            `Ah, muziek 🎵 Bij “${schoon}” ben ik benieuwd: welk nummer bedoel je?`
-          ])
-        );
-      }
-
-      if (nieuwOnderwerp === "film") {
-        return vraag(
-          "film",
-          `Je vertelt over “${schoon}”. Zou je het aanraden?`
-        );
-      }
-
-      if (nieuwOnderwerp === "crush") {
-        return vraag(
-          "crush",
-          kies([
-            `Oeh, “${schoon}” 😊 Wat vind je leuk aan diegene?`,
-            `Dat klinkt spannend. Hoe voel jij je bij “${schoon}”?`
-          ])
-        );
-      }
-
-      if (nieuwOnderwerp === "eten") {
-        return vraag(
-          "eten",
-          `Nu heb ik een belangrijke vraag over “${schoon}”: wat vind jij het lekkerst?`
-        );
-      }
-
-      // Een vrij antwoord op Noahs vorige vraag wordt niet als 'ja' ingevuld.
-      if (staat.laatsteOnderwerp === "dag") {
-        if (/\b(slecht|stom|vervelend|moeilijk)\b/.test(zin)) {
-          return vraag(
+        if (state.topic === "gevoel") {
+          return sayAndAsk(
             "gevoel",
-            `Dat klinkt als een lastige dag. Wil je vertellen wat er gebeurde?`
+            "wat wil je vertellen",
+            yes
+              ? "Ik luister. Wat wil je erover vertellen?"
+              : "Dat is oké. We kunnen ook over iets anders praten."
           );
         }
 
-        return vraag(
-          "dag",
-          `Je zegt: “${schoon}”. Wat was daarvan voor jou het leukste of belangrijkste moment?`
-        );
+        if (state.topic === "school") {
+          return sayAndAsk(
+            "school",
+            "welk vak",
+            yes
+              ? "Oké! Welk vak of welke opdracht bedoel je?"
+              : "Snap ik. Waar wil je dan liever over praten?"
+          );
+        }
+
+        if (state.topic === "crush") {
+          return sayAndAsk(
+            "crush",
+            "wat gebeurde er",
+            yes
+              ? "Oeh, vertel: wat gebeurde er?"
+              : "Geen probleem. Je hoeft er niet over te vertellen."
+          );
+        }
+
+        if (state.topic === "dag") {
+          return sayAndAsk(
+            "dag",
+            "wat gebeurde er",
+            yes
+              ? "Mooi 🙂 Wat maakte je dag fijn?"
+              : "Oei, wat maakte je dag minder leuk?"
+          );
+        }
+
+        return "Ik weet niet zeker waarop je antwoordt. Kun je er iets meer bij vertellen?";
       }
 
-      if (staat.laatsteOnderwerp === "gevoel") {
-        return vraag(
-          "gevoel",
-          `Dank je dat je het vertelt. Wat zou je nu helpen: verder praten of even afleiding?`
-        );
-      }
+      // Een nieuw genoemd onderwerp krijgt voorrang op het oude onderwerp.
+      const newSubject = subjectOf(text);
 
-      if (staat.laatsteOnderwerp === "school") {
-        return vraag(
+      if (newSubject === "school") {
+        return sayAndAsk(
           "school",
-          `Oké, “${schoon}”. Wat wil je daar precies over weten of oefenen?`
+          "wat is er met school",
+          pick([
+            `Je hebt het over “${quote}”. Wat gebeurde er precies op school?`,
+            `Over “${quote}”: wil je erover vertellen of wil je dat ik je met iets help?`
+          ])
         );
       }
 
-      if (staat.laatsteOnderwerp === "crush") {
-        return vraag(
+      if (newSubject === "games") {
+        return sayAndAsk(
+          "games",
+          "welke game en wat gebeurde er",
+          `Oeh, gamen 🎮 Wat gebeurde er bij “${quote}”?`
+        );
+      }
+
+      if (newSubject === "muziek") {
+        return sayAndAsk(
+          "muziek",
+          "welk nummer",
+          `Muziek! Welk nummer bedoel je bij “${quote}”?`
+        );
+      }
+
+      if (newSubject === "crush") {
+        return sayAndAsk(
           "crush",
-          `Ik hoor je 🙂 Wat zou jij het liefst willen dat er nu gebeurt?`
+          "wat vind je leuk aan diegene",
+          `Oeh, vertel 😊 Wat vind je leuk aan diegene?`
         );
       }
 
-      if (staat.laatsteOnderwerp === "games" ||
-          staat.laatsteOnderwerp === "film" ||
-          staat.laatsteOnderwerp === "muziek" ||
-          staat.laatsteOnderwerp === "eten") {
-        const onderwerp = staat.laatsteOnderwerp;
-        return vraag(
-          onderwerp,
-          `Ah, “${schoon}”. Hoe kwam je daarbij?`
+      if (newSubject === "film") {
+        return sayAndAsk(
+          "film",
+          "vond je het leuk",
+          `Ah, “${quote}”. Vond je het leuk om te kijken?`
         );
       }
 
-      if (zin.includes("?")) {
-        staat.laatsteOnderwerp = "";
-        return "Ik weet niet zeker of ik die vraag goed kan beantwoorden. Kun je iets preciezer vertellen wat je bedoelt?";
+      if (newSubject === "vrienden") {
+        return sayAndAsk(
+          "vrienden",
+          "wat gebeurde er",
+          `Vertel eens wat er gebeurde met je vriend of vriendin.`
+        );
       }
 
-      return vraag(
+      // Vrije antwoorden op een eerdere vraag.
+      if (state.topic === "dag") {
+        return sayAndAsk(
+          "dag",
+          "hoe voelde je je daarbij",
+          `Ah, dus “${quote}”. Hoe voelde je je daarbij?`
+        );
+      }
+
+      if (state.topic === "school") {
+        return sayAndAsk(
+          "school",
+          "wat wil je weten",
+          `Oké, over “${quote}”: wat wil je precies weten of oefenen?`
+        );
+      }
+
+      if (state.topic === "gevoel") {
+        return sayAndAsk(
+          "gevoel",
+          "wat zou helpen",
+          "Dank je dat je dat vertelt. Wil je er verder over praten, of wil je liever even afleiding?"
+        );
+      }
+
+      if (state.topic === "crush") {
+        return sayAndAsk(
+          "crush",
+          "wat wil jij",
+          "Ik snap je 😊 Wat zou jij het liefst willen dat er gebeurt?"
+        );
+      }
+
+      if (state.topic === "games") {
+        return sayAndAsk(
+          "games",
+          "wat gebeurde daarna",
+          `Oké, “${quote}”. Wat gebeurde er daarna in het spel?`
+        );
+      }
+
+      if (text.includes("?")) {
+        state.topic = "";
+        return "Ik wil je vraag niet verkeerd begrijpen. Kun je uitleggen wat je precies bedoelt?";
+      }
+
+      return sayAndAsk(
         "algemeen",
-        kies([
-          `Je zegt: “${schoon}”. Wat gebeurde er daarna?`,
-          `Ik ben benieuwd naar “${schoon}”. Hoe voelde dat voor jou?`,
-          `Vertel me meer over “${schoon}” 🙂`
+        "vertel meer",
+        pick([
+          `Je vertelt over “${quote}”. Wat gebeurde er daarna?`,
+          `“${quote}” — wat was voor jou het belangrijkste daaraan?`,
+          `Ik ben benieuwd: kun je me iets meer vertellen over “${quote}”?`
         ])
       );
     }
 
-    function controleerVriendschap() {
+    function maybeBecomeFriends() {
       if (
-        staat.fase === 0 &&
-        staat.aantalBerichten >= 12 &&
-        staat.dagen.length >= 2
+        state.phase === 0 &&
+        state.meaningfulMessages >= 12 &&
+        state.days.length >= 2
       ) {
-        staat.fase = 1;
-        staat.momenten.push({
-          datum: vandaag(),
-          tekst: "Jullie werden vrienden."
-        });
-        updateTijdlijn();
+        state.phase = 1;
         return true;
       }
 
@@ -579,65 +649,69 @@
     document.getElementById("form").addEventListener("submit", event => {
       event.preventDefault();
 
-      const tekst = invoer.value.trim();
-      if (!tekst || stuur.disabled) return;
+      const text = invoer.value.trim();
+      if (!text || stuur.disabled) return;
 
-      toonBericht(tekst, "you");
+      showMessage(text, "you");
       invoer.value = "";
       stuur.disabled = true;
 
-      if (!staat.dagen.includes(vandaag())) {
-        staat.dagen.push(vandaag());
+      if (!state.days.includes(today())) {
+        state.days.push(today());
       }
 
-      // Een enkel 'hoi', 'ja' of emoji telt niet als volledig gesprek.
-      if (tekst.length >= 5 && !/^(hoi|hallo|hey)[!?. ]*$/i.test(tekst)) {
-        staat.aantalBerichten++;
+      // Heel korte berichtjes vullen de balk niet telkens verder.
+      if (
+        text.length >= 5 &&
+        !/^(hoi|hallo|hey|ja|nee)[!?. ]*$/i.test(text)
+      ) {
+        state.meaningfulMessages++;
       }
 
-      const netVrienden = controleerVriendschap();
+      const becameFriends = maybeBecomeFriends();
 
       setTimeout(() => {
-        let antwoord = antwoordOp(tekst);
+        let reply = replyTo(text);
 
-        if (netVrienden) {
-          antwoord += "\n\nTrouwens: we praten nu al een tijdje, verspreid over verschillende dagen. Ik denk dat we vrienden zijn geworden 🙂";
+        if (becameFriends) {
+          reply += "\n\nTrouwens, we hebben elkaar nu wat beter leren kennen. Volgens onze tijdlijn zijn we vrienden geworden 🙂";
         }
 
-        toonBericht(antwoord, "noah");
-        updateTijdlijn();
-        bewaar();
-
+        showMessage(reply, "noah");
+        updateTimeline();
+        save();
         stuur.disabled = false;
         invoer.focus();
       }, 500);
     });
 
     document.getElementById("reset").addEventListener("click", () => {
-      if (!confirm("Wil je het gesprek en de relatietijdlijn wissen?")) return;
+      if (!confirm("Wil je het gesprek en de tijdsbalk wissen?")) return;
 
-      localStorage.removeItem(sleutel);
-      staat = nieuweStaat();
+      localStorage.removeItem(KEY);
+      state = newState();
       chat.textContent = "";
-      updateTijdlijn();
-      toonBericht(
+
+      showMessage(
         "Hey, ik ben Noah 🙂 We kennen elkaar nog niet. Waar wil je over kletsen?",
         "noah"
       );
+
+      updateTimeline();
     });
 
-    staat.geschiedenis.forEach(item => {
-      toonBericht(item.tekst, item.vanWie, false);
+    state.messages.forEach(message => {
+      showMessage(message.text, message.sender, false);
     });
 
-    if (staat.geschiedenis.length === 0) {
-      toonBericht(
+    if (state.messages.length === 0) {
+      showMessage(
         "Hey, ik ben Noah 🙂 We kennen elkaar nog niet. Waar wil je over kletsen?",
         "noah"
       );
     }
 
-    updateTijdlijn();
+    updateTimeline();
   </script>
 </body>
 </html>
