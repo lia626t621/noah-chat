@@ -3,715 +3,3963 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Chat met Noah</title>
+  <title>ATLAS — jouw schoolcockpit</title>
+
   <style>
+    :root {
+      --bg: #071d21;
+      --panel: #10373c;
+      --panel2: #17464a;
+      --border: #397d78;
+      --text: #effff8;
+      --muted: #b7d1ca;
+      --accent: #9ce0c7;
+      --accent-text: #10352f;
+      --danger: #ffadaa;
+    }
+
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      min-height: 100vh;
-      display: grid;
-      place-items: center;
-      background: #102b30;
-      color: #f3fffb;
-      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      font: 16px/1.5 system-ui, sans-serif;
     }
 
-    .app {
-      width: min(100%, 520px);
-      height: min(100vh, 760px);
-      display: flex;
-      flex-direction: column;
-      background: #173a40;
-      box-shadow: 0 15px 50px #061619;
+    button, input, select, textarea { font: inherit; }
+
+    button {
+      padding: 9px 13px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--accent);
+      color: var(--accent-text);
+      font-weight: 650;
+      cursor: pointer;
     }
+
+    button:hover { filter: brightness(1.08); }
+    button:disabled { opacity: .5; cursor: not-allowed; }
+
+    button.secondary {
+      background: var(--panel2);
+      color: var(--text);
+    }
+
+    button.danger {
+      background: transparent;
+      color: var(--danger);
+      border-color: var(--danger);
+    }
+
+    button.selected {
+      background: var(--accent);
+      color: var(--accent-text);
+    }
+
+    input, select, textarea {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 9px;
+      background: var(--panel2);
+      color: var(--text);
+    }
+
+    textarea {
+      min-height: 120px;
+      resize: vertical;
+    }
+
+    input[type="checkbox"] {
+      width: auto;
+      accent-color: var(--accent);
+    }
+
+    label {
+      display: block;
+      margin: 12px 0 5px;
+      font-weight: 600;
+    }
+
+    h1, h2, h3, p { margin-top: 0; }
+    h2 { color: var(--accent); }
+    small, .muted { color: var(--muted); }
 
     header {
+      border-bottom: 1px solid var(--border);
+      background: var(--panel);
+    }
+
+    .wrap {
+      width: min(1120px, calc(100% - 28px));
+      margin: auto;
+    }
+
+    header .wrap { padding: 18px 0; }
+    header h1 { margin-bottom: 0; letter-spacing: .08em; }
+
+    nav, .row {
       display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
       align-items: center;
-      gap: 12px;
-      padding: 15px;
-      background: #123036;
     }
 
-    .avatar {
+    nav { margin-top: 15px; }
+
+    nav button:not(.selected) {
+      background: var(--panel2);
+      color: var(--text);
+    }
+
+    main { padding: 22px 0 55px; }
+    [hidden] { display: none !important; }
+
+    .grid {
       display: grid;
-      place-items: center;
-      width: 62px;
-      height: 62px;
-      flex: none;
-      border: 3px solid #65dec7;
-      border-radius: 50%;
-      background: #90d9ca;
-      font-size: 35px;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      align-items: start;
     }
 
-    h1 { margin: 0 0 4px; font-size: 21px; }
-    header p { margin: 0; color: #b6d7d0; font-size: 12px; }
+    .wide { grid-column: 1 / -1; }
 
-    .relationship {
-      padding: 14px;
-      background: #19444a;
-      border-bottom: 1px solid #397d78;
+    .card {
+      min-width: 0;
+      padding: 19px;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      background: var(--panel);
     }
 
-    .relationship-top,
-    .stages {
-      display: flex;
-      justify-content: space-between;
+    .item {
+      padding: 12px 0;
+      border-bottom: 1px solid var(--border);
+      overflow-wrap: anywhere;
+    }
+
+    .item:last-child { border-bottom: 0; }
+    .row { margin-top: 10px; }
+
+    .notice {
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--panel2);
+      overflow-wrap: anywhere;
+    }
+
+    .list {
+      display: grid;
       gap: 7px;
+      margin: 12px 0;
     }
 
-    .relationship-top { font-size: 13px; }
-
-    .stages { margin: 12px 0 10px; }
-
-    .stage {
-      flex: 1;
-      padding: 7px 3px;
-      border-radius: 8px;
-      background: #275b5b;
-      color: #b6d7d0;
-      text-align: center;
-      font-size: 12px;
+    .list button {
+      width: 100%;
+      text-align: left;
+      overflow-wrap: anywhere;
     }
 
-    .stage.active {
-      background: #79dfc5;
-      color: #10332d;
-      font-weight: bold;
+    .schoolmap {
+      display: grid;
+      grid-template-columns: minmax(180px, 250px) minmax(0, 1fr);
+      gap: 18px;
     }
 
-    .bar {
-      height: 12px;
-      overflow: hidden;
-      border-radius: 99px;
-      background: #0e2d31;
-      border: 1px solid #397d78;
+    .schoolmap > * { min-width: 0; }
+
+    .paper {
+      min-height: 280px;
+      padding: 12px 18px 12px 42px;
+      border: 1px solid #a9c5c6;
+      border-radius: 10px;
+      background-color: #fffef8;
+      background-image:
+        linear-gradient(
+          90deg,
+          transparent 30px,
+          #eab5b5 30px,
+          #eab5b5 31px,
+          transparent 31px
+        ),
+        repeating-linear-gradient(
+          to bottom,
+          transparent 0,
+          transparent 31px,
+          #c7dce0 31px,
+          #c7dce0 32px
+        );
+      background-size: 100% 32px;
+      color: #173c3b;
+      font: 1rem/32px system-ui, sans-serif;
     }
 
-    #barFill {
-      width: 0%;
-      height: 100%;
-      border-radius: 99px;
-      background: linear-gradient(90deg, #51bba9, #a5ffe0);
-      transition: width .4s ease;
+    .table-scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; }
+
+    th, td {
+      padding: 8px;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
     }
 
-    #progressText {
-      margin: 8px 0 0;
-      color: #c5e1d9;
-      font-size: 12px;
-      line-height: 1.4;
-    }
-
-    #chat {
-      flex: 1;
+    .chat {
+      height: 260px;
       overflow-y: auto;
-      padding: 17px;
+      padding: 10px;
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      background: var(--bg);
     }
 
     .message {
-      width: fit-content;
-      max-width: 84%;
-      margin-bottom: 11px;
-      padding: 11px 14px;
-      border-radius: 17px;
-      line-height: 1.4;
-      overflow-wrap: anywhere;
+      margin: 8px 0;
+      padding: 9px;
+      border-radius: 9px;
+      background: var(--panel2);
       white-space: pre-wrap;
+      overflow-wrap: anywhere;
     }
 
-    .noah { background: #275b5b; }
-
-    .you {
-      margin-left: auto;
-      background: #79dfc5;
-      color: #10332d;
+    .message.you {
+      border-left: 4px solid var(--accent);
     }
 
-    form {
-      display: flex;
-      gap: 8px;
+    .question {
+      margin: 12px 0;
       padding: 12px;
-      background: #123036;
+      border: 1px solid var(--border);
+      border-radius: 10px;
     }
 
-    input {
-      flex: 1;
-      min-width: 0;
-      padding: 12px;
-      border: 0;
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+      border: 2px solid var(--accent);
       border-radius: 12px;
-      font-size: 16px;
+      background: #83d9ff;
     }
 
-    form button {
-      padding: 0 16px;
-      border: 0;
-      border-radius: 12px;
-      background: #79dfc5;
-      color: #10332d;
+    .game-controls {
+      justify-content: center;
+      touch-action: none;
+    }
+
+    .game-controls button {
+      min-width: 72px;
+      touch-action: none;
+      user-select: none;
+    }
+
+    .focus-screen {
+      position: fixed;
+      inset: 0;
+      z-index: 20;
+      overflow: auto;
+      padding: 25px;
+      background: var(--bg);
+    }
+
+    .focus-box {
+      width: min(600px, 100%);
+      margin: 10vh auto;
+    }
+
+    .timer {
+      color: var(--accent);
+      font-size: clamp(2.5rem, 9vw, 5rem);
       font-weight: bold;
-      cursor: pointer;
     }
 
-    form button:disabled { opacity: .6; }
-
-    footer {
-      padding: 0 12px 10px;
-      background: #123036;
-      color: #b6d7d0;
-      text-align: center;
-      font-size: 11px;
+    #toast {
+      position: fixed;
+      right: 15px;
+      bottom: 15px;
+      z-index: 30;
+      max-width: min(420px, calc(100% - 30px));
+      padding: 12px 16px;
+      border-radius: 10px;
+      background: var(--accent);
+      color: var(--accent-text);
+      box-shadow: 0 8px 22px #0006;
     }
 
-    footer button {
-      border: 0;
-      background: none;
-      color: #b6d7d0;
-      text-decoration: underline;
-      cursor: pointer;
+    @media (max-width: 720px) {
+      .grid, .schoolmap { grid-template-columns: 1fr; }
+      .wide { grid-column: auto; }
     }
   </style>
 </head>
+
 <body>
-  <main class="app">
-    <header>
-      <div class="avatar" aria-hidden="true">🙂</div>
-      <div>
-        <h1>Noah 💚</h1>
-        <p>Fictief chatpersonage • 13 jaar • geen echte AI</p>
-      </div>
-    </header>
+  <header>
+    <div class="wrap">
+      <h1>ATLAS</h1>
+      <div class="muted">Jouw schoolcockpit</div>
 
-    <section class="relationship" aria-label="Relatietijdlijn">
-      <div class="relationship-top">
-        <strong>Onze tijdlijn</strong>
-        <strong id="status">Vreemden</strong>
-      </div>
+      <nav id="mainMenu" aria-label="Hoofdmenu">
+        <button type="button" class="selected" data-tab="overzicht">
+          🏠 Overzicht
+        </button>
+        <button type="button" data-tab="planning">
+          ✅ Planning
+        </button>
+        <button type="button" data-tab="route">
+          🧭 Mijn route
+        </button>
+        <button type="button" data-tab="schoolmap">
+          📓 Schoolmap
+        </button>
+        <button type="button" data-tab="leren">
+          📖 Leren
+        </button>
+        <button type="button" data-tab="parkour">
+          🥪 Parkour & Amelia
+        </button>
+      </nav>
+    </div>
+  </header>
 
-      <div class="stages">
-        <span class="stage" id="stage0">Vreemden</span>
-        <span class="stage" id="stage1">Vrienden</span>
-        <span class="stage" id="stage2">Een stel</span>
-      </div>
+  <main class="wrap">
+    <section id="overzicht"></section>
+    <section id="planning" hidden></section>
+    <section id="route" hidden></section>
+    <section id="schoolmap" hidden></section>
+    <section id="leren" hidden></section>
 
-      <div
-        class="bar"
-        id="progressBar"
-        role="progressbar"
-        aria-label="Voortgang naar de volgende fase"
-        aria-valuemin="0"
-        aria-valuemax="100"
-        aria-valuenow="0"
-      >
-        <div id="barFill"></div>
-      </div>
+    <section id="parkour" hidden>
+      <h2>🥪 Broodje Parkour & Amelia.A.I</h2>
 
-      <p id="progressText"></p>
+      <div class="grid">
+        <div class="card wide">
+          <h3>🎮 Broodje Parkour</h3>
+          <p>
+            Pak donuts, ontwijk kegels en haal de finish.
+            Beweeg met A/D of de pijltjes.
+            Spring met W, ↑ of spatie.
+          </p>
+
+          <canvas id="gameCanvas"
+            width="900"
+            height="460"
+            aria-label="Broodje Parkour-spel"></canvas>
+
+          <div class="row game-controls">
+            <button type="button" id="gameLeft">◀</button>
+            <button type="button" id="gameJump">⬆ Spring</button>
+            <button type="button" id="gameRight">▶</button>
+          </div>
+
+          <div class="row">
+            <button type="button" id="gameRestart">
+              🔄 Opnieuw
+            </button>
+            <span id="gameStatus" role="status"></span>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>📚 Leerstof voor Amelia</h3>
+
+          <label for="ameliaSubject">Vak</label>
+          <select id="ameliaSubject"></select>
+
+          <p style="margin-top:12px">
+            Amelia leest de hoofdstuknotities en
+            schriftbladzijden van dit vak uit ATLAS.
+          </p>
+
+          <label for="ameliaNotes">Extra begrippen</label>
+          <textarea id="ameliaNotes"
+            placeholder="Eén begrip per regel:
+fotosynthese: planten maken glucose met licht
+celkern: onderdeel van een cel met DNA"></textarea>
+
+          <small>
+            Schrijf bij voorkeur <strong>begrip: uitleg</strong>.
+            Extra begrippen worden automatisch opgeslagen.
+          </small>
+
+          <div class="row">
+            <button type="button" id="makeTest">
+              📝 Oefentoets
+            </button>
+            <button type="button" id="makeMath">
+              🔢 Rekoefeningen
+            </button>
+          </div>
+        </div>
+
+        <div class="card">
+          <h3>💬 Vraag het Amelia.A.I</h3>
+
+          <div id="ameliaChat" class="chat"
+            aria-live="polite"></div>
+
+          <form id="ameliaForm">
+            <label for="ameliaInput">Jouw vraag</label>
+            <input id="ameliaInput"
+              autocomplete="off"
+              required
+              placeholder="Wat is fotosynthese?">
+            <button type="submit" class="row">Stuur</button>
+          </form>
+
+          <small>
+            Amelia werkt offline. Ze geeft alleen antwoorden
+            die ze in jouw leerstof kan vinden.
+          </small>
+        </div>
+
+        <div id="quizCard" class="card wide" hidden>
+          <h3 id="quizTitle">Oefentoets</h3>
+          <div id="quizQuestions"></div>
+          <button type="button" id="checkQuiz">
+            Controleer antwoorden
+          </button>
+        </div>
+      </div>
     </section>
-
-    <div id="chat" aria-live="polite"></div>
-
-    <form id="form">
-      <input
-        id="invoer"
-        placeholder="Typ hier iets..."
-        autocomplete="off"
-        maxlength="500"
-        aria-label="Jouw bericht"
-      >
-      <button id="stuur" type="submit">Stuur</button>
-    </form>
-
-    <footer>
-      Gesprek wordt in deze browser bewaard.
-      <button id="reset" type="button">Wis gesprek</button>
-    </footer>
   </main>
 
+  <div id="focusScreen" class="focus-screen" hidden>
+    <div class="card focus-box">
+      <h2>🧘 Eén ding tegelijk</h2>
+      <h3 id="focusTask"></h3>
+      <p id="focusStep"></p>
+      <div id="focusClock" class="timer">05:00</div>
+
+      <div class="row">
+        <button type="button" id="focusStart">
+          Start / pauze
+        </button>
+        <button type="button" class="secondary" id="focusClose">
+          Terug
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" role="status" hidden></div>
+
   <script>
-    const KEY = "noah-chat-met-tijdbalk-v1";
+    (() => {
+      "use strict";
 
-    const chat = document.getElementById("chat");
-    const invoer = document.getElementById("invoer");
-    const stuur = document.getElementById("stuur");
+      const STORAGE_KEY = "atlas_schoolcockpit_v1";
+      const AMELIA_KEY = "atlas_amelia_extra_v1";
+      const $ = id => document.getElementById(id);
 
-    function today() {
-      const now = new Date();
-      return [
-        now.getFullYear(),
-        String(now.getMonth() + 1).padStart(2, "0"),
-        String(now.getDate()).padStart(2, "0")
-      ].join("-");
-    }
+      const DEFAULT_SUBJECTS = [
+        ["aardrijkskunde", "- · - · - · - · -", []],
+        [
+          "beeldende vormgeving",
+          "8,0 · 8,00 · 8,0 · 8,0 · 8,0 · 8,0",
+          []
+        ],
+        [
+          "biologie",
+          "8,5 · 8,50 · 8,5 · 8,5 · 8,5 · 8,5",
+          []
+        ],
+        [
+          "Engelse taal",
+          "* · * · - · * · * · * · *",
+          ["Engels"]
+        ],
+        ["Franse taal", "- · - · - · - · -", ["Frans"]],
+        [
+          "geschiedenis",
+          "4,6 · 4,60 · 4,6 · 4,6 · 4,6 · 4,6",
+          []
+        ],
+        [
+          "lichamelijke opvoeding",
+          "G+ · 10,00 · 10,0 · 10,0 · 10,0 · 10,0",
+          ["LO", "gym"]
+        ],
+        ["mentoruur", "- · - · - · - · -", []],
+        [
+          "muziek",
+          "6,9 · 6,90 · 6,9 · 6,9 · 6,9 · 6,9",
+          []
+        ],
+        [
+          "natuurkunde",
+          "6,8 · 6,80 · 6,8 · 6,8 · 6,8 · 6,8",
+          []
+        ],
+        [
+          "Nederlandse taal",
+          "- · - · - · - · -",
+          ["Nederlands"]
+        ],
+        [
+          "Spaanse taal",
+          "6,5 · 6,50 · 6,5 · 6,5 · 6,5 · 6,5",
+          ["Spaans"]
+        ],
+        [
+          "wiskunde",
+          "6,9 · 6,90 · 6,9 · 6,9 · 6,9 · 6,9",
+          []
+        ]
+      ];
 
-    function newState() {
-      return {
-        phase: 0,
-        firstDay: today(),
-        days: [],
-        meaningfulMessages: 0,
-        topic: "",
-        question: "",
-        lastReply: "",
-        messages: []
-      };
-    }
+      const DAYS = [
+        "Maandag", "Dinsdag", "Woensdag", "Donderdag",
+        "Vrijdag", "Zaterdag", "Zondag"
+      ];
 
-    let state;
+      const fresh = () => ({
+        version: 1,
+        subjects: [],
+        tasks: [],
+        lessons: [],
+        cards: [],
+        notebooks: {},
+        books: {},
+        inbox: [],
+        supplies: [],
+        reflections: {},
+        actual: {},
+        reviews: {},
+        capacity: [60, 60, 60, 60, 60, 90, 90],
+        sessions: 0
+      });
 
-    try {
-      state = JSON.parse(localStorage.getItem(KEY)) || newState();
+      let data = fresh();
+      let ameliaExtra = {};
 
-      if (
-        !Array.isArray(state.days) ||
-        !Array.isArray(state.messages) ||
-        ![0, 1, 2].includes(state.phase)
-      ) {
-        state = newState();
-      }
-    } catch {
-      state = newState();
-    }
+      let activeTab = "overzicht";
+      let routeCategory = "overzicht";
 
-    function save() {
-      try {
-        localStorage.setItem(KEY, JSON.stringify(state));
-      } catch {
-        // De chat blijft werken als opslag niet beschikbaar is.
-      }
-    }
+      let subjectId = "";
+      let mapSection = "boeken";
+      let bookId = "";
+      let chapterId = "";
+      let pageId = "";
 
-    function showMessage(text, sender, store = true) {
-      const bubble = document.createElement("div");
-      bubble.className = "message " + sender;
-      bubble.textContent = text;
-      chat.appendChild(bubble);
-      chat.scrollTop = chat.scrollHeight;
+      let activeCardId = "";
+      let showCardAnswer = false;
+      let currentQuiz = [];
 
-      if (store) {
-        state.messages.push({ text, sender });
-        state.messages = state.messages.slice(-120);
-        save();
-      }
-    }
+      let saveTimer = null;
+      let toastTimer = null;
+      let focusTimer = null;
+      let focusSeconds = 300;
 
-    function daysSince(date) {
-      const start = new Date(date + "T12:00:00");
-      const end = new Date(today() + "T12:00:00");
-      return Math.max(0, Math.round((end - start) / 86400000));
-    }
-
-    function updateTimeline() {
-      const names = ["Vreemden", "Vrienden", "Een stel"];
-      document.getElementById("status").textContent = names[state.phase];
-
-      for (let i = 0; i < 3; i++) {
-        document.getElementById("stage" + i)
-          .classList.toggle("active", i <= state.phase);
-      }
-
-      let percentage;
-      let explanation;
-
-      if (state.phase === 0) {
-        const messages = Math.min(state.meaningfulMessages / 12, 1);
-        const days = Math.min(state.days.length / 2, 1);
-
-        percentage = Math.round(((messages + days) / 2) * 100);
-        explanation =
-          `${state.meaningfulMessages}/12 gesprekkenberichten • ` +
-          `${state.days.length}/2 verschillende dagen tot vriendschap.`;
-      } else if (state.phase === 1) {
-        const messages = Math.min(state.meaningfulMessages / 40, 1);
-        const days = Math.min(daysSince(state.firstDay) / 7, 1);
-
-        percentage = Math.round(((messages + days) / 2) * 100);
-        explanation =
-          `${state.meaningfulMessages}/40 gesprekkenberichten • ` +
-          `${daysSince(state.firstDay)}/7 dagen. ` +
-          `Bij 100% worden jullie niet automatisch een stel: ` +
-          `dat kan alleen als jij het vraagt.`;
-      } else {
-        percentage = 100;
-        explanation = "Jullie zijn in dit fictieve verhaal een stel. 💚";
-      }
-
-      document.getElementById("barFill").style.width = percentage + "%";
-      document.getElementById("progressBar")
-        .setAttribute("aria-valuenow", percentage);
-      document.getElementById("progressText").textContent = explanation;
-    }
-
-    function pick(options) {
-      const choices = options.filter(item => item !== state.lastReply);
-      const list = choices.length ? choices : options;
-      const reply = list[Math.floor(Math.random() * list.length)];
-      state.lastReply = reply;
-      return reply;
-    }
-
-    function sayAndAsk(topic, question, reply) {
-      state.topic = topic;
-      state.question = question;
-      return reply;
-    }
-
-    function shortened(text) {
-      const clean = text.replace(/\s+/g, " ").trim();
-      return clean.length > 55 ? clean.slice(0, 52) + "..." : clean;
-    }
-
-    function subjectOf(text) {
-      if (/\b(toets|school|huiswerk|leraar|cijfer|wiskunde|les)\b/.test(text))
-        return "school";
-
-      if (/\b(gamen|game|spel|minecraft|roblox)\b/.test(text))
-        return "games";
-
-      if (/\b(muziek|liedje|nummer|artiest)\b/.test(text))
-        return "muziek";
-
-      if (/\b(crush|verliefd|daten|verkering)\b/.test(text))
-        return "crush";
-
-      if (/\b(film|serie|bioscoop)\b/.test(text))
-        return "film";
-
-      if (/\b(vriend|vriendin|ruzie)\b/.test(text))
-        return "vrienden";
-
-      return "";
-    }
-
-    function replyTo(original) {
-      const text = original.toLowerCase().trim();
-      const quote = shortened(original);
-
-      // Belangrijke en persoonlijke berichten gaan altijd voor.
-      if (
-        /ik wil dood|zelfmoord|mezelf pijn doen|zelfbeschadig/.test(text)
-      ) {
-        state.topic = "gevoel";
-        return "Het klinkt alsof je het heel zwaar hebt. Vertel dit alsjeblieft meteen aan een volwassene die je vertrouwt. Ben je direct in gevaar? Bel de hulpdiensten.";
+      function newId() {
+        return globalThis.crypto?.randomUUID?.() ||
+          Date.now() + "-" + Math.random().toString(36).slice(2);
       }
 
-      if (
-        /stop met flirten|niet flirten|niet zo klef|geen verkering|ik wil stoppen|het is uit/.test(text)
-      ) {
-        if (state.phase === 2 && /ik wil stoppen|het is uit/.test(text)) {
-          state.phase = 1;
-          state.topic = "";
-          return "Oké. Ik respecteer dat. In ons verhaal zijn we weer vrienden, als jij dat wilt.";
+      function esc(value) {
+        return String(value ?? "").replace(/[&<>"']/g, char => ({
+          "&": "&amp;",
+          "<": "&lt;",
+          ">": "&gt;",
+          '"': "&quot;",
+          "'": "&#39;"
+        })[char]);
+      }
+
+      function today(offset = 0) {
+        const date = new Date();
+        date.setHours(12, 0, 0, 0);
+        date.setDate(date.getDate() + offset);
+
+        return [
+          date.getFullYear(),
+          String(date.getMonth() + 1).padStart(2, "0"),
+          String(date.getDate()).padStart(2, "0")
+        ].join("-");
+      }
+
+      function dayIndex(value) {
+        const [year, month, day] = value.split("-").map(Number);
+        return (new Date(year, month - 1, day, 12).getDay() + 6) % 7;
+      }
+
+      function dateLabel(value) {
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(String(value))) {
+          return "Geen datum";
         }
 
-        state.topic = "";
-        return "Natuurlijk. Ik respecteer wat je zegt en houd het gewoon vriendschappelijk.";
+        const [year, month, day] = value.split("-").map(Number);
+
+        return new Date(year, month - 1, day, 12)
+          .toLocaleDateString("nl-NL", {
+            weekday: "long",
+            day: "numeric",
+            month: "long"
+          });
       }
 
-      if (/verdrietig|eenzaam|somber|ik huil|ik ben bang|ik voel me rot/.test(text)) {
-        return sayAndAsk(
-          "gevoel",
-          "wat is er gebeurd",
-          "Dat klinkt moeilijk 💚 Wil je vertellen wat er gebeurd is? Je kunt ook praten met iemand die je vertrouwt."
+      function toast(text) {
+        $("toast").textContent = text;
+        $("toast").hidden = false;
+
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(() => {
+          $("toast").hidden = true;
+        }, 4000);
+      }
+
+      function normalize(input) {
+        const base = fresh();
+
+        if (!input || typeof input !== "object" ||
+            Array.isArray(input)) {
+          return base;
+        }
+
+        // Onbekende velden uit een oudere uitbreiding blijven bewaard.
+        const result = { ...base, ...input };
+
+        for (const key of [
+          "subjects", "tasks", "lessons",
+          "cards", "inbox", "supplies"
+        ]) {
+          if (!Array.isArray(result[key])) result[key] = [];
+        }
+
+        for (const key of [
+          "notebooks", "books", "reflections",
+          "actual", "reviews"
+        ]) {
+          if (!result[key] ||
+              typeof result[key] !== "object" ||
+              Array.isArray(result[key])) {
+            result[key] = {};
+          }
+        }
+
+        if (!Array.isArray(result.capacity) ||
+            result.capacity.length !== 7) {
+          result.capacity = base.capacity;
+        }
+
+        return result;
+      }
+
+      function save() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+          return true;
+        } catch {
+          toast(
+            "Opslaan lukte niet. Controleer je browseropslag."
+          );
+          return false;
+        }
+      }
+
+      function scheduleSave() {
+        clearTimeout(saveTimer);
+
+        if ($("editStatus")) {
+          $("editStatus").textContent = "Bezig met bewaren…";
+        }
+
+        saveTimer = setTimeout(() => {
+          saveTimer = null;
+          if (save() && $("editStatus")) {
+            $("editStatus").textContent =
+              "Bewaard in deze browser.";
+          }
+        }, 250);
+      }
+
+      function flushSave() {
+        if (saveTimer) {
+          clearTimeout(saveTimer);
+          saveTimer = null;
+          save();
+        }
+      }
+
+      function addMissingSubjects() {
+        for (const [name, grades, aliases] of DEFAULT_SUBJECTS) {
+          const names = [name, ...aliases]
+            .map(value => value.toLowerCase());
+
+          const existing = data.subjects.find(subject =>
+            names.includes(
+              String(subject.name || "").toLowerCase()
+            )
+          );
+
+          if (existing) {
+            // Bewaar het bestaande ID: notities horen bij dat ID.
+            existing.name = name;
+            if (existing.grades === undefined) {
+              existing.grades = grades;
+            }
+          } else {
+            data.subjects.push({
+              id: newId(),
+              name,
+              grades
+            });
+          }
+        }
+      }
+
+      function load() {
+        try {
+          const stored = localStorage.getItem(STORAGE_KEY);
+          if (stored) data = normalize(JSON.parse(stored));
+        } catch {
+          toast(
+            "Oude ATLAS-gegevens konden niet worden gelezen."
+          );
+          return;
+        }
+
+        try {
+          const stored = JSON.parse(
+            localStorage.getItem(AMELIA_KEY) || "{}"
+          );
+
+          if (stored && typeof stored === "object" &&
+              !Array.isArray(stored)) {
+            ameliaExtra = stored;
+          }
+        } catch {
+          ameliaExtra = {};
+        }
+
+        addMissingSubjects();
+        save();
+      }
+
+      function subjectName(id) {
+        return data.subjects.find(subject =>
+          String(subject.id) === String(id)
+        )?.name || "Onbekend vak";
+      }
+
+      function subjectOptions() {
+        return data.subjects.map(subject => `
+          <option value="${esc(subject.id)}">
+            ${esc(subject.name)}
+          </option>
+        `).join("");
+      }
+
+      function openTasks() {
+        return data.tasks
+          .filter(task => !task.done)
+          .sort((a, b) =>
+            String(a.deadline || "9999")
+              .localeCompare(String(b.deadline || "9999"))
+          );
+      }
+
+      function taskById(id) {
+        return data.tasks.find(task =>
+          String(task.id) === String(id)
         );
       }
 
-      if (/ben je echt|ben je een ai|ben je een bot|wie ben jij/.test(text)) {
-        return "Ik ben Noah, een fictief chatpersonage. Ik ben geen echt persoon en begrijp nog niet alles wat je typt.";
+      function taskOptions() {
+        return openTasks().map(task => `
+          <option value="${esc(task.id)}">
+            ${esc(subjectName(task.subjectId))} —
+            ${esc(task.title)}
+          </option>
+        `).join("");
       }
 
-      // Eerst reageren op een vraag over verkering, vóór andere onderwerpen.
-      const asksRelationship =
-        /wil je (met mij )?verkering|zullen we (verkering|een stel)|wil je mijn vriendje zijn|wil je mijn partner zijn|ik wil verkering met (je|jou)|kunnen we (verkering|een stel)/.test(text);
+      function firstStep(task) {
+        return task?.steps?.find(step => !step.done)?.text ||
+          "Begin met vijf minuten.";
+      }
 
-      if (asksRelationship) {
-        state.topic = "relatie";
+      function booksFor(id) {
+        const key = String(id);
+        if (!Array.isArray(data.books[key])) {
+          data.books[key] = [];
+        }
+        return data.books[key];
+      }
 
-        if (state.phase === 2) {
-          return "Haha, in ons verhaal hebben we al verkering 💚";
+      function pagesFor(id) {
+        const key = String(id);
+        if (!Array.isArray(data.notebooks[key])) {
+          data.notebooks[key] = [];
+        }
+        return data.notebooks[key];
+      }
+
+      function selectedBook() {
+        return booksFor(subjectId).find(book =>
+          String(book.id) === String(bookId)
+        );
+      }
+
+      function chaptersFor(book) {
+        if (!book) return [];
+        if (!Array.isArray(book.chapters)) book.chapters = [];
+        return book.chapters;
+      }
+
+      function selectedChapter() {
+        return chaptersFor(selectedBook()).find(chapter =>
+          String(chapter.id) === String(chapterId)
+        );
+      }
+
+      function changeTab(tab) {
+        if (!$(tab)) return;
+
+        flushSave();
+        activeTab = tab;
+
+        for (const section of document.querySelectorAll(
+          "main > section"
+        )) {
+          section.hidden = section.id !== tab;
         }
 
-        if (state.phase === 0) {
-          return "Ik snap wat je vraagt, en dat is lief 😊 Maar we kennen elkaar nog maar net. Laten we eerst rustig vrienden worden.";
+        for (const button of document.querySelectorAll(
+          "#mainMenu [data-tab]"
+        )) {
+          button.classList.toggle(
+            "selected",
+            button.dataset.tab === tab
+          );
+        }
+
+        if (tab === "parkour") {
+          loadAmeliaSubjects();
+        } else {
+          gameKeys.left = false;
+          gameKeys.right = false;
+          gameKeys.jump = false;
+        }
+
+        render();
+      }
+
+      function render() {
+        if (activeTab === "overzicht") renderOverview();
+        if (activeTab === "planning") renderPlanning();
+        if (activeTab === "route") renderRoute();
+        if (activeTab === "schoolmap") renderSchoolmap();
+        if (activeTab === "leren") renderLeren();
+      }
+
+      function renderOverview() {
+        const next = openTasks()[0];
+        const tomorrow = today(1);
+
+        const lessons = data.lessons
+          .filter(lesson =>
+            Number(lesson.day) === dayIndex(tomorrow)
+          )
+          .sort((a, b) =>
+            String(a.time).localeCompare(String(b.time))
+          );
+
+        $("overzicht").innerHTML = `
+          <div class="grid">
+            <div class="card">
+              <h2>🏠 Welkom bij ATLAS</h2>
+
+              <p>
+                ${openTasks().length} open taken ·
+                ${data.subjects.length} vakken ·
+                ${Number(data.sessions) || 0} focussessies
+              </p>
+
+              <div class="notice">
+                <strong>Volgende kleine stap</strong><br>
+                ${next
+                  ? esc(next.title) + " — " + esc(firstStep(next))
+                  : "Voeg bij Planning een taak toe."}
+              </div>
+
+              <div class="row">
+                <button type="button" data-focus>
+                  🧘 Rustknop
+                </button>
+                <button type="button"
+                  class="secondary"
+                  data-go="schoolmap">
+                  Open mijn boeken
+                </button>
+              </div>
+            </div>
+
+            <div class="card">
+              <h2>🎒 Morgen klaar</h2>
+              <p class="muted">${esc(dateLabel(tomorrow))}</p>
+
+              <h3>Lessen</h3>
+
+              ${lessons.map(lesson => `
+                <div class="item">
+                  ${esc(lesson.time)} ·
+                  ${esc(subjectName(lesson.subjectId))}
+                  ${lesson.room ? " · " + esc(lesson.room) : ""}
+                </div>
+              `).join("") ||
+                '<p class="muted">Geen lessen ingevoerd.</p>'}
+
+              <h3>Deadlines</h3>
+
+              ${openTasks()
+                .filter(task => task.deadline === tomorrow)
+                .map(task => `
+                  <div class="item">${esc(task.title)}</div>
+                `).join("") ||
+                '<p class="muted">Geen deadlines morgen.</p>'}
+
+              <h3>Spullen</h3>
+
+              ${data.supplies
+                .filter(item => item.date === tomorrow)
+                .map(item => `
+                  <label>
+                    <input type="checkbox"
+                      data-supply="${esc(item.id)}"
+                      ${item.done ? "checked" : ""}>
+                    ${esc(item.text)}
+                  </label>
+                `).join("")}
+
+              <form id="supplyForm" class="row">
+                <input name="text" required maxlength="100"
+                  placeholder="Bijv. gymspullen">
+                <button type="submit">Voeg toe</button>
+              </form>
+            </div>
+
+            <div class="card wide">
+              <h2>📋 Mijn vakken en cijfers</h2>
+
+              <div class="table-scroll">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Vak</th>
+                      <th>Opgegeven waarden, in volgorde</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${data.subjects.map(subject => `
+                      <tr>
+                        <td>${esc(subject.name)}</td>
+                        <td>${esc(
+                          subject.grades || "Geen waarden"
+                        )}</td>
+                      </tr>
+                    `).join("")}
+                  </tbody>
+                </table>
+              </div>
+
+              <small>
+                Streepjes en sterretjes worden niet
+                als cijfer berekend.
+              </small>
+            </div>
+
+            <div class="card wide">
+              <h2>💾 Back-up</h2>
+              <p>
+                Je gegevens worden op dit apparaat
+                in deze browser bewaard.
+              </p>
+
+              <div class="row">
+                <button type="button" id="downloadBackup">
+                  Download back-up
+                </button>
+
+                <button type="button"
+                  class="secondary"
+                  id="chooseBackup">
+                  Zet back-up terug
+                </button>
+
+                <input id="backupFile"
+                  type="file"
+                  accept=".json,application/json"
+                  hidden>
+              </div>
+
+              <small>
+                Terugzetten vervangt je huidige
+                ATLAS-gegevens.
+              </small>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderPlanning() {
+        $("planning").innerHTML = `
+          <div class="grid">
+            <div class="card">
+              <h2>📚 Vakken</h2>
+
+              <p>
+                Je 13 vakken staan er al in.
+                Extra vakken kun je hieronder toevoegen.
+              </p>
+
+              <form id="subjectForm">
+                <label for="newSubject">Extra vak</label>
+                <input id="newSubject" name="name"
+                  required maxlength="50"
+                  placeholder="Naam van het vak">
+                <button type="submit" class="row">
+                  Voeg vak toe
+                </button>
+              </form>
+            </div>
+
+            <div class="card">
+              <h2>➕ Nieuwe taak</h2>
+
+              <form id="taskForm">
+                <label for="taskSubject">Vak</label>
+                <select id="taskSubject" name="subjectId">
+                  ${subjectOptions()}
+                </select>
+
+                <label for="taskTitle">Taak</label>
+                <input id="taskTitle" name="title"
+                  required maxlength="120"
+                  placeholder="Bijv. hoofdstuk 3 leren">
+
+                <label for="taskDeadline">
+                  Deadline (mag leeg)
+                </label>
+                <input id="taskDeadline"
+                  name="deadline" type="date">
+
+                <label for="taskMinutes">
+                  Geschatte minuten
+                </label>
+                <input id="taskMinutes"
+                  name="minutes"
+                  type="number" min="5" max="1200"
+                  value="25" required>
+
+                <button type="submit" class="row">
+                  Bewaar taak
+                </button>
+              </form>
+            </div>
+
+            <div class="card">
+              <h2>🧩 Taakbreker</h2>
+
+              <form id="stepForm">
+                <label for="stepTask">Kies een taak</label>
+                <select id="stepTask" name="taskId">
+                  ${taskOptions()}
+                </select>
+
+                <label for="stepText">
+                  Kleine stap
+                </label>
+                <input id="stepText" name="text"
+                  required maxlength="120"
+                  placeholder="Bijv. lees twee pagina's">
+
+                <button type="submit" class="row"
+                  ${openTasks().length ? "" : "disabled"}>
+                  Voeg stap toe
+                </button>
+              </form>
+            </div>
+
+            <div class="card">
+              <h2>🗓️ Lesrooster</h2>
+
+              <form id="lessonForm">
+                <label for="lessonSubject">Vak</label>
+                <select id="lessonSubject" name="subjectId">
+                  ${subjectOptions()}
+                </select>
+
+                <label for="lessonDay">Dag</label>
+                <select id="lessonDay" name="day">
+                  ${DAYS.map((day, index) => `
+                    <option value="${index}">
+                      ${day}
+                    </option>
+                  `).join("")}
+                </select>
+
+                <label for="lessonTime">Begintijd</label>
+                <input id="lessonTime" name="time"
+                  type="time" required>
+
+                <label for="lessonRoom">
+                  Lokaal (mag leeg)
+                </label>
+                <input id="lessonRoom"
+                  name="room" maxlength="40">
+
+                <button type="submit" class="row">
+                  Voeg les toe
+                </button>
+              </form>
+
+              ${data.lessons.map(lesson => `
+                <div class="item">
+                  ${esc(DAYS[lesson.day] || "?")}
+                  ${esc(lesson.time)} ·
+                  ${esc(subjectName(lesson.subjectId))}
+                  ${lesson.room
+                    ? " · " + esc(lesson.room)
+                    : ""}
+
+                  <button type="button"
+                    class="danger"
+                    data-delete-lesson="${esc(lesson.id)}">
+                    Verwijder
+                  </button>
+                </div>
+              `).join("")}
+            </div>
+
+            <div class="card wide">
+              <h2>✅ Mijn taken</h2>
+
+              ${data.tasks.map(task => `
+                <div class="item">
+                  <strong>${esc(task.title)}</strong>
+
+                  <div class="muted">
+                    ${esc(subjectName(task.subjectId))} ·
+                    ${Number(task.minutes) || 25} minuten ·
+                    ${task.deadline
+                      ? "deadline: " +
+                        esc(dateLabel(task.deadline))
+                      : "geen deadline"}
+                    ${task.plannedDate
+                      ? " · werkdag: " +
+                        esc(dateLabel(task.plannedDate))
+                      : ""}
+                    ${task.done ? " · afgerond" : ""}
+                  </div>
+
+                  ${(Array.isArray(task.steps)
+                    ? task.steps
+                    : []
+                  ).map(step => `
+                    <label>
+                      <input type="checkbox"
+                        data-step-task="${esc(task.id)}"
+                        data-step-id="${esc(step.id)}"
+                        ${step.done ? "checked" : ""}>
+                      ${esc(step.text)}
+                    </label>
+                  `).join("")}
+
+                  <div class="row">
+                    <button type="button"
+                      class="secondary"
+                      data-toggle-task="${esc(task.id)}">
+                      ${task.done
+                        ? "Opnieuw openen"
+                        : "Taak afgerond"}
+                    </button>
+
+                    <button type="button"
+                      class="danger"
+                      data-delete-task="${esc(task.id)}">
+                      Verwijder
+                    </button>
+                  </div>
+                </div>
+              `).join("") ||
+                '<p class="muted">Nog geen taken.</p>'}
+            </div>
+          </div>
+        `;
+      }
+
+      function makePlan() {
+        const dates = Array.from({ length: 14 }, (_, index) =>
+          today(index)
+        );
+
+        const days = Object.fromEntries(
+          dates.map(date => [
+            date,
+            {
+              capacity:
+                Number(data.capacity[dayIndex(date)]) || 0,
+              used: 0,
+              entries: []
+            }
+          ])
+        );
+
+        const problems = [];
+
+        for (const task of openTasks().filter(
+          item => item.plannedDate
+        )) {
+          const date = task.plannedDate;
+          const minutes = Math.max(
+            5,
+            Number(task.minutes) || 25
+          );
+
+          if (!days[date]) continue;
+
+          days[date].used += minutes;
+          days[date].entries.push(
+            `📌 ${task.title} (${minutes} min)`
+          );
+
+          if (task.deadline && date > task.deadline) {
+            problems.push(
+              `“${task.title}” staat ná de deadline.`
+            );
+          }
+        }
+
+        for (const task of openTasks().filter(
+          item => !item.plannedDate
+        )) {
+          let remaining = Math.max(
+            5,
+            Number(task.minutes) || 25
+          );
+
+          for (const date of dates) {
+            if (remaining <= 0) break;
+            if (task.deadline && date > task.deadline) break;
+
+            const free = Math.max(
+              0,
+              days[date].capacity - days[date].used
+            );
+
+            const minutes = Math.min(30, remaining, free);
+
+            if (minutes > 0) {
+              days[date].used += minutes;
+              days[date].entries.push(
+                `${task.title} (${minutes} min)`
+              );
+              remaining -= minutes;
+            }
+          }
+
+          if (remaining > 0) {
+            problems.push(
+              `Voor “${task.title}” passen nog ` +
+              `${remaining} minuten niet in deze planning.`
+            );
+          }
+        }
+
+        for (const date of dates) {
+          if (days[date].used > days[date].capacity) {
+            problems.push(
+              `${dateLabel(date)} is ` +
+              `${days[date].used - days[date].capacity}` +
+              " minuten te vol."
+            );
+          }
+        }
+
+        return { dates, days, problems };
+      }
+
+      function renderRoute() {
+        const plan = makePlan();
+        let content = "";
+
+        if (routeCategory === "overzicht") {
+          const next = openTasks()[0];
+
+          content = `
+            <div class="grid">
+              <div class="card">
+                <h2>🧭 Volgende stap</h2>
+
+                <div class="notice">
+                  ${next
+                    ? esc(next.title) +
+                      " — " +
+                      esc(firstStep(next))
+                    : "Er zijn geen open taken."}
+                </div>
+
+                <button type="button"
+                  class="row" data-focus>
+                  🧘 Open rustknop
+                </button>
+              </div>
+
+              <div class="card">
+                <h2>🚦 Weekdrukte</h2>
+
+                ${plan.dates.slice(0, 7).map(date => `
+                  <div class="item">
+                    ${esc(dateLabel(date))}:
+                    ${plan.days[date].used}/
+                    ${plan.days[date].capacity}
+                    minuten
+                  </div>
+                `).join("")}
+              </div>
+
+              <div class="card wide">
+                <h2>🔎 Knelpunten</h2>
+
+                ${plan.problems.length
+                  ? plan.problems.map(problem => `
+                      <div class="item">
+                        ${esc(problem)}
+                      </div>
+                    `).join("")
+                  : "<p>Volgens de ingevulde tijden " +
+                    "past het werk voorlopig.</p>"}
+
+                <small>
+                  Dit is een schatting.
+                </small>
+              </div>
+            </div>
+          `;
+        }
+
+        if (routeCategory === "plannen") {
+          content = `
+            <div class="grid">
+              <div class="card">
+                <h2>🕒 Beschikbare tijd</h2>
+                <p class="muted">
+                  Minuten per dag buiten school.
+                </p>
+
+                ${DAYS.map((day, index) => `
+                  <label for="capacity${index}">
+                    ${day}
+                  </label>
+
+                  <input id="capacity${index}"
+                    type="number"
+                    min="0" max="600" step="5"
+                    data-capacity="${index}"
+                    value="${
+                      Number(data.capacity[index]) || 0
+                    }">
+                `).join("")}
+              </div>
+
+              <div class="card">
+                <h2>📌 Werkdag kiezen</h2>
+                <p>
+                  Dit verandert de echte deadline niet.
+                </p>
+
+                <form id="pinForm">
+                  <label for="pinTask">Taak</label>
+                  <select id="pinTask" name="taskId">
+                    ${taskOptions()}
+                  </select>
+
+                  <label for="pinDate">Werkdag</label>
+                  <input id="pinDate"
+                    name="date" type="date"
+                    min="${today()}"
+                    max="${today(13)}"
+                    value="${today()}">
+
+                  <button type="submit"
+                    ${openTasks().length
+                      ? ""
+                      : "disabled"}>
+                    Zet vast
+                  </button>
+                </form>
+
+                <button type="button"
+                  class="secondary row"
+                  id="unpinTask"
+                  ${openTasks().length
+                    ? ""
+                    : "disabled"}>
+                  Maak taak weer flexibel
+                </button>
+              </div>
+
+              <div class="card wide">
+                <h2>📅 Komende 14 dagen</h2>
+
+                ${plan.dates.map(date => {
+                  const day = plan.days[date];
+
+                  return `
+                    <div class="item">
+                      <strong>
+                        ${esc(dateLabel(date))}
+                      </strong>
+                      <small>
+                        · ${day.used}/
+                        ${day.capacity} minuten
+                      </small>
+
+                      ${day.entries.map(entry => `
+                        <div>• ${esc(entry)}</div>
+                      `).join("")}
+                    </div>
+                  `;
+                }).join("")}
+              </div>
+            </div>
+          `;
+        }
+
+        if (routeCategory === "taken") {
+          content = `
+            <div class="grid">
+              <div class="card">
+                <h2>📥 Gedachten-inbox</h2>
+
+                <form id="inboxForm">
+                  <input name="text"
+                    maxlength="160" required
+                    placeholder="Wat wil je onthouden?">
+
+                  <button type="submit" class="row">
+                    Bewaar gedachte
+                  </button>
+                </form>
+
+                ${data.inbox.map(item => `
+                  <div class="item">
+                    ${esc(item.text)}
+                    <button type="button"
+                      class="danger"
+                      data-delete-inbox="${
+                        esc(item.id)
+                      }">
+                      Verwijder
+                    </button>
+                  </div>
+                `).join("")}
+              </div>
+
+              <div class="card">
+                <h2>❓ Hulpvraag-maker</h2>
+
+                <form id="helpForm">
+                  <label for="helpTask">Taak</label>
+                  <select id="helpTask"
+                    name="taskId">
+                    ${taskOptions()}
+                  </select>
+
+                  <label for="helpProblem">
+                    Waar loop je vast?
+                  </label>
+
+                  <textarea id="helpProblem"
+                    name="problem"
+                    maxlength="350"
+                    required></textarea>
+
+                  <button type="submit"
+                    ${openTasks().length
+                      ? ""
+                      : "disabled"}>
+                    Maak hulpvraag
+                  </button>
+                </form>
+
+                <p class="notice"
+                  id="helpOutput">
+                  Er wordt niets automatisch verstuurd.
+                </p>
+              </div>
+            </div>
+          `;
+        }
+
+        if (routeCategory === "leren") {
+          content = `
+            <div class="card">
+              <h2>🔁 Slimme herhaling</h2>
+              <p>
+                ${dueCards().length}
+                kaart(en) zijn aan de beurt.
+              </p>
+
+              <button type="button" data-go="leren">
+                Open flashcards
+              </button>
+            </div>
+          `;
+        }
+
+        if (routeCategory === "terug") {
+          const monday = today(-dayIndex(today()));
+
+          content = `
+            <div class="grid">
+              <div class="card">
+                <h2>🕒 Schattingchecker</h2>
+
+                <form id="actualForm">
+                  <label for="actualTask">Taak</label>
+
+                  <select id="actualTask"
+                    name="taskId">
+                    ${data.tasks.map(task => `
+                      <option value="${esc(task.id)}">
+                        ${esc(task.title)}
+                      </option>
+                    `).join("")}
+                  </select>
+
+                  <label for="actualMinutes">
+                    Hoeveel minuten kostte het echt?
+                  </label>
+
+                  <input id="actualMinutes"
+                    name="minutes" type="number"
+                    min="1" max="1200" required>
+
+                  <button type="submit"
+                    ${data.tasks.length
+                      ? ""
+                      : "disabled"}>
+                    Bewaar
+                  </button>
+                </form>
+
+                ${Object.entries(data.actual)
+                  .map(([id, minutes]) => {
+                    const task = taskById(id);
+
+                    return task ? `
+                      <div class="item">
+                        ${esc(task.title)}:
+                        geschat ${Number(task.minutes)} min,
+                        echt ${Number(minutes)} min
+                      </div>
+                    ` : "";
+                  }).join("")}
+              </div>
+
+              <div class="card">
+                <h2>📊 Weekreflectie</h2>
+
+                <label for="reflection">
+                  Wat ging goed?
+                  Wat wil je anders doen?
+                </label>
+
+                <textarea id="reflection"
+                  placeholder="Deze week hielp het om...">${
+                    esc(data.reflections[monday] || "")
+                  }</textarea>
+
+                <small>
+                  Wordt tijdens het typen bewaard.
+                </small>
+              </div>
+            </div>
+          `;
+        }
+
+        const categories = [
+          ["overzicht", "🏠 Overzicht"],
+          ["plannen", "📅 Plannen"],
+          ["taken", "✅ Taken & hulp"],
+          ["leren", "📖 Leren"],
+          ["terug", "📊 Terugkijken"]
+        ];
+
+        $("route").innerHTML = `
+          <h2>🧭 Mijn route</h2>
+
+          <nav aria-label="Categorieën">
+            ${categories.map(([key, label]) => `
+              <button type="button"
+                class="${
+                  routeCategory === key
+                    ? "selected"
+                    : ""
+                }"
+                data-category="${key}">
+                ${label}
+              </button>
+            `).join("")}
+          </nav>
+
+          <div style="margin-top:18px">
+            ${content}
+          </div>
+        `;
+      }
+
+      function renderSchoolmap() {
+        if (!data.subjects.some(subject =>
+          String(subject.id) === String(subjectId)
+        )) {
+          subjectId = data.subjects[0]
+            ? String(data.subjects[0].id)
+            : "";
+
+          pageId = "";
+          bookId = "";
+          chapterId = "";
+        }
+
+        const subject = data.subjects.find(item =>
+          String(item.id) === String(subjectId)
+        );
+
+        const pages = subject ? pagesFor(subjectId) : [];
+        const books = subject ? booksFor(subjectId) : [];
+
+        if (!pages.some(page =>
+          String(page.id) === String(pageId)
+        )) {
+          pageId = pages[0] ? String(pages[0].id) : "";
+        }
+
+        if (!books.some(book =>
+          String(book.id) === String(bookId)
+        )) {
+          bookId = books[0] ? String(books[0].id) : "";
+          chapterId = "";
+        }
+
+        const page = pages.find(item =>
+          String(item.id) === String(pageId)
+        );
+
+        const book = selectedBook();
+        const chapters = chaptersFor(book);
+
+        if (!chapters.some(chapter =>
+          String(chapter.id) === String(chapterId)
+        )) {
+          chapterId = chapters[0]
+            ? String(chapters[0].id)
+            : "";
+        }
+
+        const chapter = selectedChapter();
+
+        $("schoolmap").innerHTML = `
+          <div class="card">
+            <h2>📓 Schoolmap</h2>
+            <p>
+              Ieder vak heeft een eigen schrift én
+              een plek voor boeken en hoofdstukken.
+            </p>
+
+            <div class="schoolmap">
+              <aside>
+                <h3>Vakken</h3>
+
+                <div class="list">
+                  ${data.subjects.map(item => `
+                    <button type="button"
+                      class="${
+                        String(item.id) ===
+                        String(subjectId)
+                          ? "selected"
+                          : "secondary"
+                      }"
+                      data-map-subject="${esc(item.id)}">
+                      📁 ${esc(item.name)}
+                    </button>
+                  `).join("")}
+                </div>
+              </aside>
+
+              <article>
+                <h3>${esc(subject?.name || "")}</h3>
+
+                <nav aria-label="Schoolmap-onderdelen">
+                  <button type="button"
+                    class="${
+                      mapSection === "boeken"
+                        ? "selected"
+                        : "secondary"
+                    }"
+                    data-map-section="boeken">
+                    📚 Boeken en hoofdstukken
+                  </button>
+
+                  <button type="button"
+                    class="${
+                      mapSection === "schrift"
+                        ? "selected"
+                        : "secondary"
+                    }"
+                    data-map-section="schrift">
+                    📓 Schrift
+                  </button>
+                </nav>
+
+                <div style="margin-top:18px">
+                  ${mapSection === "boeken"
+                    ? renderBooks(
+                        books, book, chapters, chapter
+                      )
+                    : renderNotebook(
+                        pages, page, subject
+                      )}
+                </div>
+              </article>
+            </div>
+          </div>
+        `;
+      }
+
+      function renderBooks(
+        books, book, chapters, chapter
+      ) {
+        return `
+          <div class="notice">
+            Voeg zelf boeken en hoofdstukken toe.
+            ATLAS kent je lesmethode niet automatisch.
+          </div>
+
+          <form id="bookForm">
+            <label for="bookName">
+              Naam van nieuw boek
+            </label>
+            <input id="bookName" name="name"
+              maxlength="120" required
+              placeholder="Bijv. mijn wiskundeboek">
+            <button type="submit" class="row">
+              + Boek toevoegen
+            </button>
+          </form>
+
+          ${books.length ? `
+            <h3 style="margin-top:22px">Boeken</h3>
+
+            <div class="list">
+              ${books.map(item => `
+                <button type="button"
+                  class="${
+                    String(item.id) === String(bookId)
+                      ? "selected"
+                      : "secondary"
+                  }"
+                  data-book="${esc(item.id)}">
+                  📘 ${esc(item.name)}
+                  (${Array.isArray(item.chapters)
+                    ? item.chapters.length
+                    : 0} hoofdstukken)
+                </button>
+              `).join("")}
+            </div>
+          ` : ""}
+
+          ${book ? `
+            <hr>
+
+            <h3>📘 Gekozen boek</h3>
+
+            <label for="editBookName">Boeknaam</label>
+            <input id="editBookName"
+              maxlength="120"
+              value="${esc(book.name)}">
+
+            <label for="bookInfo">
+              Extra informatie over dit boek
+            </label>
+
+            <textarea id="bookInfo"
+              maxlength="2000"
+              placeholder="Bijv. editie of opmerkingen">${
+                esc(book.info || "")
+              }</textarea>
+
+            <p>
+              <small id="editStatus" role="status">
+                Wijzigingen worden automatisch bewaard.
+              </small>
+            </p>
+
+            <button type="button"
+              class="danger"
+              id="deleteBook">
+              Verwijder dit boek
+            </button>
+
+            <h3 style="margin-top:24px">
+              Hoofdstukken
+            </h3>
+
+            <form id="chapterForm">
+              <label for="chapterNumber">
+                Nummer (mag leeg)
+              </label>
+              <input id="chapterNumber"
+                name="number" maxlength="25"
+                placeholder="Bijv. 3">
+
+              <label for="chapterTitle">
+                Hoofdstuktitel
+              </label>
+              <input id="chapterTitle"
+                name="title" maxlength="120"
+                required
+                placeholder="Bijv. Verbanden">
+
+              <button type="submit" class="row">
+                + Hoofdstuk toevoegen
+              </button>
+            </form>
+
+            ${chapters.length ? `
+              <div class="list" style="margin-top:20px">
+                ${chapters.map(item => `
+                  <button type="button"
+                    class="${
+                      String(item.id) ===
+                      String(chapterId)
+                        ? "selected"
+                        : "secondary"
+                    }"
+                    data-chapter="${esc(item.id)}">
+                    📄 ${item.number
+                      ? esc(item.number) + " — "
+                      : ""}${esc(item.title)}
+                  </button>
+                `).join("")}
+              </div>
+            ` : `
+              <p class="muted">
+                Dit boek heeft nog geen hoofdstukken.
+              </p>
+            `}
+
+            ${chapter ? `
+              <hr>
+
+              <h3>Hoofdstuk bewerken</h3>
+
+              <label for="editChapterNumber">
+                Nummer
+              </label>
+              <input id="editChapterNumber"
+                maxlength="25"
+                value="${esc(chapter.number || "")}">
+
+              <label for="editChapterTitle">
+                Titel
+              </label>
+              <input id="editChapterTitle"
+                maxlength="120"
+                value="${esc(chapter.title)}">
+
+              <label for="chapterNotes">
+                Mijn notities bij dit hoofdstuk
+              </label>
+
+              <textarea id="chapterNotes"
+                class="paper"
+                placeholder="Schrijf hier je samenvatting, begrippen of vragen...">${
+                  esc(chapter.notes || "")
+                }</textarea>
+
+              <button type="button"
+                class="danger row"
+                id="deleteChapter">
+                Verwijder hoofdstuk
+              </button>
+            ` : ""}
+          ` : ""}
+        `;
+      }
+
+      function renderNotebook(pages, page, subject) {
+        const index = pages.indexOf(page);
+
+        return `
+          <p>
+            Je eigen schrift voor
+            <strong>${esc(subject?.name || "")}</strong>.
+          </p>
+
+          <button type="button" id="addPage">
+            + Nieuwe bladzijde
+          </button>
+
+          <div class="list">
+            ${pages.map((item, number) => `
+              <button type="button"
+                class="${
+                  String(item.id) === String(pageId)
+                    ? "selected"
+                    : "secondary"
+                }"
+                data-page="${esc(item.id)}">
+                📄 ${number + 1}.
+                ${esc(
+                  item.title || "Naamloze bladzijde"
+                )}
+              </button>
+            `).join("")}
+          </div>
+
+          ${page ? `
+            <p class="muted">
+              Bladzijde ${index + 1}
+              van ${pages.length}
+            </p>
+
+            <div class="row">
+              <button type="button"
+                class="secondary"
+                data-page-direction="-1"
+                ${index === 0 ? "disabled" : ""}>
+                ← Vorige
+              </button>
+
+              <button type="button"
+                class="secondary"
+                data-page-direction="1"
+                ${index === pages.length - 1
+                  ? "disabled"
+                  : ""}>
+                Volgende →
+              </button>
+            </div>
+
+            <label for="pageTitle">Titel</label>
+            <input id="pageTitle"
+              maxlength="100"
+              value="${esc(page.title)}">
+
+            <label for="pageText">
+              Mijn notities
+            </label>
+
+            <textarea id="pageText"
+              class="paper"
+              placeholder="Schrijf hier je notities...">${
+                esc(page.content || "")
+              }</textarea>
+
+            <p>
+              <small id="editStatus" role="status">
+                Wijzigingen worden automatisch bewaard.
+              </small>
+            </p>
+
+            <button type="button"
+              class="danger"
+              id="deletePage">
+              Verwijder bladzijde
+            </button>
+          ` : `
+            <div class="notice">
+              Dit schrift is nog leeg.
+              Maak je eerste bladzijde.
+            </div>
+          `}
+        `;
+      }
+
+      function dueCards() {
+        return data.cards.filter(card => {
+          const review = data.reviews[card.id];
+          return !review || !review.due ||
+            review.due <= today();
+        });
+      }
+
+      function renderLeren() {
+        const card = data.cards.find(item =>
+          String(item.id) === String(activeCardId)
+        );
+
+        $("leren").innerHTML = `
+          <div class="grid">
+            <div class="card">
+              <h2>➕ Flashcard maken</h2>
+
+              <form id="cardForm">
+                <label for="cardSubject">Vak</label>
+                <select id="cardSubject" name="subjectId">
+                  ${subjectOptions()}
+                </select>
+
+                <label for="question">
+                  Vraag of begrip
+                </label>
+                <input id="question"
+                  name="question"
+                  maxlength="250"
+                  required>
+
+                <label for="answer">
+                  Antwoord of uitleg
+                </label>
+                <textarea id="answer"
+                  name="answer"
+                  maxlength="1000"
+                  required></textarea>
+
+                <button type="submit">
+                  Bewaar flashcard
+                </button>
+              </form>
+            </div>
+
+            <div class="card">
+              <h2>🔁 Oefenen</h2>
+              <p>
+                ${dueCards().length}
+                kaart(en) aan de beurt.
+              </p>
+
+              ${card ? `
+                <div class="notice">
+                  <small>
+                    ${esc(subjectName(card.subjectId))}
+                  </small>
+
+                  <h3>${esc(card.question)}</h3>
+
+                  ${showCardAnswer
+                    ? `<p>${esc(card.answer)
+                        .replace(/\n/g, "<br>")}</p>`
+                    : ""}
+                </div>
+
+                <div class="row">
+                  ${showCardAnswer ? `
+                    <button type="button"
+                      class="secondary"
+                      id="cardWrong">
+                      Nog niet goed
+                    </button>
+
+                    <button type="button"
+                      id="cardRight">
+                      Goed
+                    </button>
+                  ` : `
+                    <button type="button"
+                      id="showCardAnswer">
+                      Toon antwoord
+                    </button>
+                  `}
+                </div>
+              ` : `
+                <button type="button"
+                  id="nextCard"
+                  ${dueCards().length
+                    ? ""
+                    : "disabled"}>
+                  Start met oefenen
+                </button>
+              `}
+            </div>
+
+            <div class="card wide">
+              <h2>🗂️ Mijn kaarten</h2>
+
+              ${data.cards.map(item => `
+                <div class="item">
+                  ${esc(item.question)}
+                  <small>
+                    · ${esc(
+                      subjectName(item.subjectId)
+                    )}
+                  </small>
+
+                  <button type="button"
+                    class="danger"
+                    data-delete-card="${esc(item.id)}">
+                    Verwijder
+                  </button>
+                </div>
+              `).join("") ||
+                '<p class="muted">Nog geen flashcards.</p>'}
+            </div>
+          </div>
+        `;
+      }
+
+      function nextCard() {
+        activeCardId = dueCards()[0]?.id || "";
+        showCardAnswer = false;
+        renderLeren();
+
+        if (!activeCardId) {
+          toast("Geen kaarten meer aan de beurt.");
+        }
+      }
+
+      function scoreCard(correct) {
+        if (!showCardAnswer || !activeCardId) return;
+
+        const old = Number(
+          data.reviews[activeCardId]?.stage
+        ) || 0;
+
+        const stage = correct
+          ? Math.min(5, old + 1)
+          : 0;
+
+        const days = correct
+          ? [0, 1, 3, 7, 14, 30][stage]
+          : 1;
+
+        data.reviews[activeCardId] = {
+          stage,
+          due: today(days)
+        };
+
+        save();
+        nextCard();
+      }
+
+      function updateFocusClock() {
+        $("focusClock").textContent =
+          String(Math.floor(focusSeconds / 60))
+            .padStart(2, "0") +
+          ":" +
+          String(focusSeconds % 60)
+            .padStart(2, "0");
+      }
+
+      function openFocus() {
+        const task = openTasks()[0];
+
+        if (!task) {
+          toast("Voeg eerst een taak toe.");
+          return;
+        }
+
+        clearInterval(focusTimer);
+        focusTimer = null;
+        focusSeconds = 300;
+
+        $("focusTask").textContent = task.title;
+        $("focusStep").textContent = firstStep(task);
+        $("focusScreen").hidden = false;
+
+        updateFocusClock();
+      }
+
+      function downloadBackup() {
+        flushSave();
+
+        const payload = {
+          ...data,
+          ameliaExtra
+        };
+
+        const blob = new Blob(
+          [JSON.stringify(payload, null, 2)],
+          { type: "application/json" }
+        );
+
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+
+        link.href = url;
+        link.download = `atlas-backup-${today()}.json`;
+        link.click();
+
+        setTimeout(() => URL.revokeObjectURL(url), 1000);
+      }
+
+      // Algemene navigatie.
+      document.addEventListener("click", event => {
+        const tab = event.target.closest("[data-tab]");
+        const go = event.target.closest("[data-go]");
+
+        if (tab) changeTab(tab.dataset.tab);
+        if (go) changeTab(go.dataset.go);
+
+        if (event.target.closest("[data-focus]")) {
+          openFocus();
+        }
+      });
+
+      $("focusStart").addEventListener("click", () => {
+        if (focusTimer) {
+          clearInterval(focusTimer);
+          focusTimer = null;
+          return;
+        }
+
+        focusTimer = setInterval(() => {
+          focusSeconds--;
+          updateFocusClock();
+
+          if (focusSeconds <= 0) {
+            clearInterval(focusTimer);
+            focusTimer = null;
+            data.sessions =
+              (Number(data.sessions) || 0) + 1;
+            save();
+            toast(
+              "Goed gedaan: vijf minuten gefocust!"
+            );
+          }
+        }, 1000);
+      });
+
+      $("focusClose").addEventListener("click", () => {
+        clearInterval(focusTimer);
+        focusTimer = null;
+        $("focusScreen").hidden = true;
+        render();
+      });
+
+      // Overzicht en back-up.
+      $("overzicht").addEventListener("submit", event => {
+        if (event.target.id !== "supplyForm") return;
+
+        event.preventDefault();
+
+        const text =
+          event.target.elements.text.value.trim();
+
+        if (!text) return;
+
+        data.supplies.push({
+          id: newId(),
+          text,
+          date: today(1),
+          done: false
+        });
+
+        save();
+        renderOverview();
+      });
+
+      $("overzicht").addEventListener("change", async event => {
+        if (event.target.dataset.supply) {
+          const item = data.supplies.find(entry =>
+            String(entry.id) ===
+            event.target.dataset.supply
+          );
+
+          if (item) {
+            item.done = event.target.checked;
+            save();
+            renderOverview();
+          }
+        }
+
+        if (event.target.id === "backupFile") {
+          const file = event.target.files[0];
+          if (!file) return;
+
+          try {
+            const parsed = JSON.parse(await file.text());
+
+            if (!parsed ||
+                !Array.isArray(parsed.subjects) ||
+                !Array.isArray(parsed.tasks) ||
+                !parsed.notebooks ||
+                typeof parsed.notebooks !== "object") {
+              throw new Error(
+                "Dit lijkt geen ATLAS-back-up."
+              );
+            }
+
+            if (!confirm(
+              "Huidige ATLAS-gegevens vervangen " +
+              "door deze back-up?"
+            )) return;
+
+            flushSave();
+            data = normalize(parsed);
+            addMissingSubjects();
+
+            if (parsed.ameliaExtra &&
+                typeof parsed.ameliaExtra === "object" &&
+                !Array.isArray(parsed.ameliaExtra)) {
+              ameliaExtra = parsed.ameliaExtra;
+
+              localStorage.setItem(
+                AMELIA_KEY,
+                JSON.stringify(ameliaExtra)
+              );
+            }
+
+            subjectId = "";
+            bookId = "";
+            chapterId = "";
+            pageId = "";
+            activeCardId = "";
+
+            save();
+            renderOverview();
+            toast("Back-up teruggezet.");
+          } catch (error) {
+            toast(
+              "Terugzetten mislukt: " +
+              (error.message || "bestand niet leesbaar.")
+            );
+          } finally {
+            event.target.value = "";
+          }
+        }
+      });
+
+      $("overzicht").addEventListener("click", event => {
+        if (event.target.id === "downloadBackup") {
+          downloadBackup();
+        }
+
+        if (event.target.id === "chooseBackup") {
+          $("backupFile").click();
+        }
+      });
+
+      // Planning.
+      $("planning").addEventListener("submit", event => {
+        const form = event.target;
+
+        if (![
+          "subjectForm", "taskForm",
+          "stepForm", "lessonForm"
+        ].includes(form.id)) return;
+
+        event.preventDefault();
+
+        if (form.id === "subjectForm") {
+          const name = form.elements.name.value.trim();
+          if (!name) return;
+
+          if (data.subjects.some(subject =>
+            subject.name.toLowerCase() ===
+            name.toLowerCase()
+          )) {
+            toast("Dit vak bestaat al.");
+            return;
+          }
+
+          data.subjects.push({
+            id: newId(),
+            name,
+            grades: ""
+          });
+        }
+
+        if (form.id === "taskForm") {
+          const title = form.elements.title.value.trim();
+          const minutes = Number(
+            form.elements.minutes.value
+          );
+
+          if (!title ||
+              !Number.isInteger(minutes) ||
+              minutes < 5 ||
+              minutes > 1200) return;
+
+          data.tasks.push({
+            id: newId(),
+            subjectId:
+              form.elements.subjectId.value,
+            title,
+            deadline:
+              form.elements.deadline.value,
+            minutes,
+            done: false,
+            plannedDate: "",
+            steps: []
+          });
+        }
+
+        if (form.id === "stepForm") {
+          const task = taskById(
+            form.elements.taskId.value
+          );
+
+          const text =
+            form.elements.text.value.trim();
+
+          if (!task || !text) return;
+
+          if (!Array.isArray(task.steps)) {
+            task.steps = [];
+          }
+
+          task.steps.push({
+            id: newId(),
+            text,
+            done: false
+          });
+        }
+
+        if (form.id === "lessonForm") {
+          if (!form.elements.time.value) return;
+
+          data.lessons.push({
+            id: newId(),
+            subjectId:
+              form.elements.subjectId.value,
+            day: Number(form.elements.day.value),
+            time: form.elements.time.value,
+            room: form.elements.room.value.trim()
+          });
+        }
+
+        save();
+        renderPlanning();
+      });
+
+      $("planning").addEventListener("click", event => {
+        const toggle = event.target.closest(
+          "[data-toggle-task]"
+        );
+
+        const remove = event.target.closest(
+          "[data-delete-task]"
+        );
+
+        const lesson = event.target.closest(
+          "[data-delete-lesson]"
+        );
+
+        if (toggle) {
+          const task = taskById(
+            toggle.dataset.toggleTask
+          );
+          if (task) task.done = !task.done;
+        }
+
+        if (remove) {
+          const task = taskById(
+            remove.dataset.deleteTask
+          );
+
+          if (!task ||
+              !confirm(
+                `Taak “${task.title}” verwijderen?`
+              )) return;
+
+          data.tasks = data.tasks.filter(item =>
+            String(item.id) !== String(task.id)
+          );
+
+          delete data.actual[task.id];
+        }
+
+        if (lesson) {
+          data.lessons = data.lessons.filter(item =>
+            String(item.id) !==
+            lesson.dataset.deleteLesson
+          );
+        }
+
+        if (toggle || remove || lesson) {
+          save();
+          renderPlanning();
+        }
+      });
+
+      $("planning").addEventListener("change", event => {
+        const task = taskById(
+          event.target.dataset.stepTask
+        );
+
+        const step = task?.steps?.find(item =>
+          String(item.id) ===
+          event.target.dataset.stepId
+        );
+
+        if (!step) return;
+
+        step.done = event.target.checked;
+        save();
+      });
+
+      // Mijn route.
+      $("route").addEventListener("click", event => {
+        const category = event.target.closest(
+          "[data-category]"
+        );
+
+        if (category) {
+          routeCategory = category.dataset.category;
+          renderRoute();
+          return;
+        }
+
+        const remove = event.target.closest(
+          "[data-delete-inbox]"
+        );
+
+        if (remove) {
+          data.inbox = data.inbox.filter(item =>
+            String(item.id) !==
+            remove.dataset.deleteInbox
+          );
+
+          save();
+          renderRoute();
+          return;
+        }
+
+        if (event.target.id === "unpinTask") {
+          const task = taskById(
+            $("pinTask")?.value
+          );
+
+          if (!task) return;
+
+          task.plannedDate = "";
+          save();
+          renderRoute();
+        }
+      });
+
+      $("route").addEventListener("submit", event => {
+        const form = event.target;
+
+        if (![
+          "pinForm", "inboxForm",
+          "helpForm", "actualForm"
+        ].includes(form.id)) return;
+
+        event.preventDefault();
+
+        if (form.id === "pinForm") {
+          const task = taskById(
+            form.elements.taskId.value
+          );
+
+          const date = form.elements.date.value;
+
+          if (!task ||
+              date < today() ||
+              date > today(13)) {
+            toast(
+              "Kies een werkdag binnen " +
+              "de komende 14 dagen."
+            );
+            return;
+          }
+
+          task.plannedDate = date;
+          save();
+          renderRoute();
+        }
+
+        if (form.id === "inboxForm") {
+          const text =
+            form.elements.text.value.trim();
+
+          if (!text) return;
+
+          data.inbox.unshift({
+            id: newId(),
+            text
+          });
+
+          save();
+          renderRoute();
+        }
+
+        if (form.id === "helpForm") {
+          const task = taskById(
+            form.elements.taskId.value
+          );
+
+          const problem =
+            form.elements.problem.value.trim();
+
+          if (!task || !problem) return;
+
+          $("helpOutput").textContent =
+            `Hoi, ik werk aan “${task.title}” ` +
+            `voor ${subjectName(task.subjectId)}. ` +
+            `Ik loop vast bij: ${problem} ` +
+            "Kunt u uitleggen hoe ik verder kan?";
+        }
+
+        if (form.id === "actualForm") {
+          const task = taskById(
+            form.elements.taskId.value
+          );
+
+          const minutes = Number(
+            form.elements.minutes.value
+          );
+
+          if (!task ||
+              !Number.isInteger(minutes) ||
+              minutes < 1 ||
+              minutes > 1200) return;
+
+          data.actual[task.id] = minutes;
+          save();
+          renderRoute();
+        }
+      });
+
+      $("route").addEventListener("change", event => {
+        const index = event.target.dataset.capacity;
+        if (index === undefined) return;
+
+        const minutes = Number(event.target.value);
+
+        if (!Number.isInteger(minutes) ||
+            minutes < 0 ||
+            minutes > 600) {
+          toast("Kies minuten tussen 0 en 600.");
+          renderRoute();
+          return;
+        }
+
+        data.capacity[Number(index)] = minutes;
+        save();
+        renderRoute();
+      });
+
+      $("route").addEventListener("input", event => {
+        if (event.target.id !== "reflection") return;
+
+        const monday = today(
+          -dayIndex(today())
+        );
+
+        data.reflections[monday] =
+          event.target.value;
+
+        save();
+      });
+
+      // Schoolmap.
+      $("schoolmap").addEventListener("click", event => {
+        const vak = event.target.closest(
+          "[data-map-subject]"
+        );
+
+        const section = event.target.closest(
+          "[data-map-section]"
+        );
+
+        const book = event.target.closest(
+          "[data-book]"
+        );
+
+        const chapter = event.target.closest(
+          "[data-chapter]"
+        );
+
+        const page = event.target.closest(
+          "[data-page]"
+        );
+
+        const direction = event.target.closest(
+          "[data-page-direction]"
+        );
+
+        if (vak) {
+          flushSave();
+          subjectId = vak.dataset.mapSubject;
+          bookId = "";
+          chapterId = "";
+          pageId = "";
+          renderSchoolmap();
+          return;
+        }
+
+        if (section) {
+          flushSave();
+          mapSection = section.dataset.mapSection;
+          renderSchoolmap();
+          return;
+        }
+
+        if (book) {
+          flushSave();
+          bookId = book.dataset.book;
+          chapterId = "";
+          renderSchoolmap();
+          return;
+        }
+
+        if (chapter) {
+          flushSave();
+          chapterId = chapter.dataset.chapter;
+          renderSchoolmap();
+          return;
+        }
+
+        if (page) {
+          flushSave();
+          pageId = page.dataset.page;
+          renderSchoolmap();
+          return;
+        }
+
+        if (event.target.id === "deleteBook") {
+          const selected = selectedBook();
+
+          if (!selected ||
+              !confirm(
+                `Boek “${selected.name}” met ` +
+                "alle hoofdstukken verwijderen?"
+              )) return;
+
+          flushSave();
+
+          data.books[String(subjectId)] =
+            booksFor(subjectId).filter(item =>
+              String(item.id) !== String(bookId)
+            );
+
+          bookId = "";
+          chapterId = "";
+          save();
+          renderSchoolmap();
+          return;
+        }
+
+        if (event.target.id === "deleteChapter") {
+          const selected = selectedBook();
+          const current = selectedChapter();
+
+          if (!selected ||
+              !current ||
+              !confirm(
+                `Hoofdstuk “${current.title}” verwijderen?`
+              )) return;
+
+          flushSave();
+
+          selected.chapters =
+            chaptersFor(selected).filter(item =>
+              String(item.id) !== String(chapterId)
+            );
+
+          chapterId = "";
+          save();
+          renderSchoolmap();
+          return;
+        }
+
+        if (event.target.id === "addPage") {
+          flushSave();
+
+          const pages = pagesFor(subjectId);
+          const created = {
+            id: newId(),
+            title: `Bladzijde ${pages.length + 1}`,
+            content: ""
+          };
+
+          pages.push(created);
+          pageId = String(created.id);
+
+          save();
+          renderSchoolmap();
+          $("pageTitle")?.focus();
+          return;
+        }
+
+        if (direction) {
+          flushSave();
+
+          const pages = pagesFor(subjectId);
+
+          const index = pages.findIndex(item =>
+            String(item.id) === String(pageId)
+          );
+
+          const next = pages[
+            index +
+            Number(direction.dataset.pageDirection)
+          ];
+
+          if (next) {
+            pageId = String(next.id);
+            renderSchoolmap();
+          }
+
+          return;
+        }
+
+        if (event.target.id === "deletePage") {
+          const pages = pagesFor(subjectId);
+
+          const index = pages.findIndex(item =>
+            String(item.id) === String(pageId)
+          );
+
+          if (index < 0 ||
+              !confirm(
+                "Deze bladzijde verwijderen?"
+              )) return;
+
+          flushSave();
+          pages.splice(index, 1);
+
+          pageId = String(
+            pages[index]?.id ||
+            pages[index - 1]?.id ||
+            ""
+          );
+
+          save();
+          renderSchoolmap();
+        }
+      });
+
+      $("schoolmap").addEventListener("submit", event => {
+        const form = event.target;
+
+        if (![
+          "bookForm", "chapterForm"
+        ].includes(form.id)) return;
+
+        event.preventDefault();
+        flushSave();
+
+        if (form.id === "bookForm") {
+          const name =
+            form.elements.name.value.trim();
+
+          if (!name) return;
+
+          const created = {
+            id: newId(),
+            name,
+            info: "",
+            chapters: []
+          };
+
+          booksFor(subjectId).push(created);
+          bookId = String(created.id);
+          chapterId = "";
+        }
+
+        if (form.id === "chapterForm") {
+          const book = selectedBook();
+          const title =
+            form.elements.title.value.trim();
+
+          if (!book || !title) return;
+
+          const created = {
+            id: newId(),
+            number:
+              form.elements.number.value.trim(),
+            title,
+            notes: ""
+          };
+
+          chaptersFor(book).push(created);
+          chapterId = String(created.id);
+        }
+
+        save();
+        renderSchoolmap();
+      });
+
+      $("schoolmap").addEventListener("input", event => {
+        const field = event.target.id;
+        const book = selectedBook();
+        const chapter = selectedChapter();
+
+        const page = pagesFor(subjectId).find(item =>
+          String(item.id) === String(pageId)
+        );
+
+        if (field === "editBookName" && book) {
+          book.name = event.target.value;
+        } else if (field === "bookInfo" && book) {
+          book.info = event.target.value;
+        } else if (
+          field === "editChapterNumber" &&
+          chapter
+        ) {
+          chapter.number = event.target.value;
+        } else if (
+          field === "editChapterTitle" &&
+          chapter
+        ) {
+          chapter.title = event.target.value;
+        } else if (
+          field === "chapterNotes" &&
+          chapter
+        ) {
+          chapter.notes = event.target.value;
+        } else if (field === "pageTitle" && page) {
+          page.title = event.target.value;
+        } else if (field === "pageText" && page) {
+          page.content = event.target.value;
+        } else {
+          return;
+        }
+
+        scheduleSave();
+      });
+
+      $("schoolmap").addEventListener("change", event => {
+        if ([
+          "editBookName",
+          "editChapterNumber",
+          "editChapterTitle",
+          "pageTitle"
+        ].includes(event.target.id)) {
+          flushSave();
+          renderSchoolmap();
+        }
+      });
+
+      // Flashcards.
+      $("leren").addEventListener("submit", event => {
+        if (event.target.id !== "cardForm") return;
+        event.preventDefault();
+
+        const form = event.target;
+        const question =
+          form.elements.question.value.trim();
+        const answer =
+          form.elements.answer.value.trim();
+
+        if (!question || !answer) return;
+
+        data.cards.push({
+          id: newId(),
+          subjectId:
+            form.elements.subjectId.value,
+          question,
+          answer
+        });
+
+        save();
+        renderLeren();
+      });
+
+      $("leren").addEventListener("click", event => {
+        if (event.target.id === "nextCard") {
+          nextCard();
+        }
+
+        if (event.target.id === "showCardAnswer") {
+          showCardAnswer = true;
+          renderLeren();
+        }
+
+        if (event.target.id === "cardWrong") {
+          scoreCard(false);
+        }
+
+        if (event.target.id === "cardRight") {
+          scoreCard(true);
+        }
+
+        const remove = event.target.closest(
+          "[data-delete-card]"
+        );
+
+        if (remove) {
+          if (!confirm(
+            "Deze flashcard verwijderen?"
+          )) return;
+
+          const id = remove.dataset.deleteCard;
+
+          data.cards = data.cards.filter(card =>
+            String(card.id) !== id
+          );
+
+          delete data.reviews[id];
+
+          if (String(activeCardId) === id) {
+            activeCardId = "";
+            showCardAnswer = false;
+          }
+
+          save();
+          renderLeren();
+        }
+      });
+
+      /*
+       * Amelia.A.I
+       * Zoekt alleen in het geselecteerde ATLAS-vak.
+       */
+      function loadAmeliaSubjects() {
+        const select = $("ameliaSubject");
+        const old = select.value;
+
+        select.innerHTML = subjectOptions();
+
+        if (data.subjects.some(item =>
+          String(item.id) === old
+        )) {
+          select.value = old;
+        }
+
+        loadAmeliaExtra();
+      }
+
+      function loadAmeliaExtra() {
+        $("ameliaNotes").value =
+          ameliaExtra[$("ameliaSubject").value] || "";
+      }
+
+      function saveAmeliaExtra() {
+        ameliaExtra[$("ameliaSubject").value] =
+          $("ameliaNotes").value;
+
+        try {
+          localStorage.setItem(
+            AMELIA_KEY,
+            JSON.stringify(ameliaExtra)
+          );
+        } catch {
+          speak(
+            "Amelia",
+            "Extra begrippen konden niet worden opgeslagen."
+          );
+        }
+      }
+
+      function learningSources() {
+        const id = $("ameliaSubject").value;
+        const sources = [];
+        const books = data.books?.[id];
+
+        if (Array.isArray(books)) {
+          for (const book of books) {
+            if (book.info?.trim()) {
+              sources.push({
+                place: `Boek: ${book.name}`,
+                text: book.info
+              });
+            }
+
+            if (!Array.isArray(book.chapters)) continue;
+
+            for (const chapter of book.chapters) {
+              if (!chapter.notes?.trim()) continue;
+
+              sources.push({
+                place:
+                  `Boek ${book.name}, hoofdstuk ` +
+                  `${chapter.number || ""} ` +
+                  `${chapter.title}`.trim(),
+                text: chapter.notes
+              });
+            }
+          }
+        }
+
+        const pages = data.notebooks?.[id];
+
+        if (Array.isArray(pages)) {
+          for (const page of pages) {
+            if (!page.content?.trim()) continue;
+
+            sources.push({
+              place:
+                `Schrift: ${page.title || "bladzijde"}`,
+              text: page.content
+            });
+          }
+        }
+
+        const own = ameliaExtra[id] || "";
+
+        if (own.trim()) {
+          sources.push({
+            place: "Extra begrippen bij Amelia",
+            text: own
+          });
+        }
+
+        return sources;
+      }
+
+      function definitions() {
+        const found = [];
+
+        for (const source of learningSources()) {
+          for (const line of source.text.split(/\r?\n/)) {
+            const colon = line.indexOf(":");
+            if (colon < 1) continue;
+
+            const term = line.slice(0, colon).trim();
+            const explanation =
+              line.slice(colon + 1).trim();
+
+            if (
+              term.length > 1 &&
+              term.length < 90 &&
+              explanation.length > 2
+            ) {
+              found.push({
+                term,
+                explanation,
+                place: source.place
+              });
+            }
+          }
+        }
+
+        return found;
+      }
+
+      function normalized(value) {
+        return String(value)
+          .toLocaleLowerCase("nl")
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^a-z0-9]+/g, " ")
+          .trim();
+      }
+
+      function searchWords(value) {
+        const ignore = new Set([
+          "wat", "wie", "waar", "wanneer", "waarom",
+          "hoe", "is", "zijn", "het", "een",
+          "de", "en", "of", "kan", "kun",
+          "je", "jij", "ik", "mijn", "van",
+          "over", "voor", "met", "bij",
+          "uit", "leg", "vertel", "uitleg",
+          "betekent", "betekenis"
+        ]);
+
+        return normalized(value)
+          .split(" ")
+          .filter(word =>
+            word.length > 2 &&
+            !ignore.has(word)
+          );
+      }
+
+      function speak(who, text) {
+        const line = document.createElement("div");
+
+        line.className =
+          "message" + (who === "Jij" ? " you" : "");
+
+        line.textContent = `${who}: ${text}`;
+        $("ameliaChat").appendChild(line);
+        $("ameliaChat").scrollTop =
+          $("ameliaChat").scrollHeight;
+      }
+
+      function answerQuestion(question) {
+        const q = normalized(question);
+
+        if (q.includes("oefentoets")) {
+          makeAmeliaTest();
+          return;
         }
 
         if (
-          state.meaningfulMessages < 40 ||
-          daysSince(state.firstDay) < 7
+          q.includes("rekoefening") ||
+          q.includes("rekensom")
         ) {
-          return "Ik snap je vraag echt 😊 We zijn vrienden, maar laten we nog wat langer de tijd nemen om elkaar te leren kennen. Je kunt op de balk zien hoe ver het verhaal is.";
+          makeAmeliaMath();
+          return;
         }
 
-        state.phase = 2;
-        return "Ja, dat lijkt me leuk 😊 We hebben rustig de tijd genomen. In ons fictieve verhaal zijn we nu een stel 💚";
-      }
+        const match = definitions()
+          .filter(item =>
+            q.includes(normalized(item.term))
+          )
+          .sort((a, b) =>
+            b.term.length - a.term.length
+          )[0];
 
-      if (/hou je van me|hou je van mij|vind je mij leuk/.test(text)) {
-        return state.phase === 2
-          ? "Ik vind het fijn om in ons verhaal samen te zijn 💚 Wat vind jij leuk aan onze gesprekken?"
-          : "Ik vind het gezellig om met je te praten 😊 Maar we hoeven niets te overhaasten.";
-      }
-
-      if (/^(hoi|hallo|hey|hee|heyy)[!?. ]*$/.test(text)) {
-        return sayAndAsk(
-          "dag",
-          "hoe was je dag",
-          pick([
-            "Hey 🙂 Hoe was je dag?",
-            "Hoi! Wat heb je vandaag gedaan?",
-            "Hee, leuk dat je er bent. Hoe gaat het?"
-          ])
-        );
-      }
-
-      if (/hoe gaat het met (je|jou)|hoe is het met je/.test(text)) {
-        return sayAndAsk(
-          "dag",
-          "hoe gaat het met jou",
-          "Goed hoor 🙂 En hoe gaat het met jou?"
-        );
-      }
-
-      // Als jij antwoord geeft op Noahs vraag, gebruikt hij die context.
-      if (/^(ja|jazeker|zeker|klopt|nee|nope|nah)[!?. ]*$/.test(text)) {
-        const yes = /^(ja|jazeker|zeker|klopt)/.test(text);
-
-        if (state.topic === "gevoel") {
-          return sayAndAsk(
-            "gevoel",
-            "wat wil je vertellen",
-            yes
-              ? "Ik luister. Wat wil je erover vertellen?"
-              : "Dat is oké. We kunnen ook over iets anders praten."
+        if (match) {
+          speak(
+            "Amelia",
+            `${match.term}: ${match.explanation}\n` +
+            `Bron: ${match.place}.\n` +
+            "Kun jij het in je eigen woorden uitleggen?"
           );
+          return;
         }
 
-        if (state.topic === "school") {
-          return sayAndAsk(
-            "school",
-            "welk vak",
-            yes
-              ? "Oké! Welk vak of welke opdracht bedoel je?"
-              : "Snap ik. Waar wil je dan liever over praten?"
+        const queryWords = searchWords(question);
+
+        const results = learningSources()
+          .map(source => {
+            const lines = source.text
+              .split(/\r?\n/)
+              .map(line => line.trim())
+              .filter(Boolean);
+
+            const ranked = lines.map(line => ({
+              line,
+              score: queryWords.filter(word =>
+                normalized(line).includes(word)
+              ).length
+            }));
+
+            ranked.sort((a, b) =>
+              b.score - a.score
+            );
+
+            return {
+              place: source.place,
+              best: ranked[0]
+            };
+          })
+          .filter(result =>
+            result.best &&
+            result.best.score > 0
+          )
+          .sort((a, b) =>
+            b.best.score - a.best.score
           );
-        }
 
-        if (state.topic === "crush") {
-          return sayAndAsk(
-            "crush",
-            "wat gebeurde er",
-            yes
-              ? "Oeh, vertel: wat gebeurde er?"
-              : "Geen probleem. Je hoeft er niet over te vertellen."
+        if (results.length) {
+          const best = results[0];
+
+          speak(
+            "Amelia",
+            "Ik vond dit in jouw leerstof:\n" +
+            best.best.line.slice(0, 500) + "\n" +
+            `Bron: ${best.place}.\n` +
+            "Helpt dit? Je kunt ook een specifiekere vraag stellen."
           );
+          return;
         }
 
-        if (state.topic === "dag") {
-          return sayAndAsk(
-            "dag",
-            "wat gebeurde er",
-            yes
-              ? "Mooi 🙂 Wat maakte je dag fijn?"
-              : "Oei, wat maakte je dag minder leuk?"
+        speak(
+          "Amelia",
+          "Dat kan ik niet betrouwbaar beantwoorden " +
+          "met de leerstof die nu bij dit vak in ATLAS " +
+          "staat. Voeg hoofdstuknotities, schrifttekst " +
+          "of een regel 'begrip: uitleg' toe."
+        );
+      }
+
+      function showQuiz(items, title) {
+        currentQuiz = items;
+        $("quizTitle").textContent = title;
+        $("quizQuestions").replaceChildren();
+        $("quizCard").hidden = false;
+
+        items.forEach((item, index) => {
+          const box = document.createElement("div");
+          box.className = "question";
+
+          const prompt = document.createElement("div");
+          prompt.textContent =
+            `${index + 1}. ${item.prompt}`;
+
+          const field = document.createElement("input");
+          field.type = "text";
+          field.autocomplete = "off";
+          field.setAttribute(
+            "aria-label",
+            `Antwoord op vraag ${index + 1}`
           );
+
+          const feedback = document.createElement("div");
+          feedback.style.marginTop = "8px";
+
+          box.append(prompt, field, feedback);
+          $("quizQuestions").appendChild(box);
+        });
+
+        $("quizCard").scrollIntoView({
+          behavior: "smooth",
+          block: "start"
+        });
+      }
+
+      function shuffle(items) {
+        const copy = [...items];
+
+        for (let i = copy.length - 1; i > 0; i--) {
+          const j = Math.floor(
+            Math.random() * (i + 1)
+          );
+
+          [copy[i], copy[j]] = [copy[j], copy[i]];
         }
 
-        return "Ik weet niet zeker waarop je antwoordt. Kun je er iets meer bij vertellen?";
+        return copy;
       }
 
-      // Een nieuw genoemd onderwerp krijgt voorrang op het oude onderwerp.
-      const newSubject = subjectOf(text);
+      function makeAmeliaTest() {
+        const items = shuffle(definitions())
+          .slice(0, 5)
+          .map(item => ({
+            prompt:
+              "Welk begrip hoort bij deze uitleg? " +
+              item.explanation,
+            answer: item.term,
+            hint:
+              "Het begint met " +
+              item.term.charAt(0).toUpperCase() + "."
+          }));
 
-      if (newSubject === "school") {
-        return sayAndAsk(
-          "school",
-          "wat is er met school",
-          pick([
-            `Je hebt het over “${quote}”. Wat gebeurde er precies op school?`,
-            `Over “${quote}”: wil je erover vertellen of wil je dat ik je met iets help?`
-          ])
-        );
-      }
-
-      if (newSubject === "games") {
-        return sayAndAsk(
-          "games",
-          "welke game en wat gebeurde er",
-          `Oeh, gamen 🎮 Wat gebeurde er bij “${quote}”?`
-        );
-      }
-
-      if (newSubject === "muziek") {
-        return sayAndAsk(
-          "muziek",
-          "welk nummer",
-          `Muziek! Welk nummer bedoel je bij “${quote}”?`
-        );
-      }
-
-      if (newSubject === "crush") {
-        return sayAndAsk(
-          "crush",
-          "wat vind je leuk aan diegene",
-          `Oeh, vertel 😊 Wat vind je leuk aan diegene?`
-        );
-      }
-
-      if (newSubject === "film") {
-        return sayAndAsk(
-          "film",
-          "vond je het leuk",
-          `Ah, “${quote}”. Vond je het leuk om te kijken?`
-        );
-      }
-
-      if (newSubject === "vrienden") {
-        return sayAndAsk(
-          "vrienden",
-          "wat gebeurde er",
-          `Vertel eens wat er gebeurde met je vriend of vriendin.`
-        );
-      }
-
-      // Vrije antwoorden op een eerdere vraag.
-      if (state.topic === "dag") {
-        return sayAndAsk(
-          "dag",
-          "hoe voelde je je daarbij",
-          `Ah, dus “${quote}”. Hoe voelde je je daarbij?`
-        );
-      }
-
-      if (state.topic === "school") {
-        return sayAndAsk(
-          "school",
-          "wat wil je weten",
-          `Oké, over “${quote}”: wat wil je precies weten of oefenen?`
-        );
-      }
-
-      if (state.topic === "gevoel") {
-        return sayAndAsk(
-          "gevoel",
-          "wat zou helpen",
-          "Dank je dat je dat vertelt. Wil je er verder over praten, of wil je liever even afleiding?"
-        );
-      }
-
-      if (state.topic === "crush") {
-        return sayAndAsk(
-          "crush",
-          "wat wil jij",
-          "Ik snap je 😊 Wat zou jij het liefst willen dat er gebeurt?"
-        );
-      }
-
-      if (state.topic === "games") {
-        return sayAndAsk(
-          "games",
-          "wat gebeurde daarna",
-          `Oké, “${quote}”. Wat gebeurde er daarna in het spel?`
-        );
-      }
-
-      if (text.includes("?")) {
-        state.topic = "";
-        return "Ik wil je vraag niet verkeerd begrijpen. Kun je uitleggen wat je precies bedoelt?";
-      }
-
-      return sayAndAsk(
-        "algemeen",
-        "vertel meer",
-        pick([
-          `Je vertelt over “${quote}”. Wat gebeurde er daarna?`,
-          `“${quote}” — wat was voor jou het belangrijkste daaraan?`,
-          `Ik ben benieuwd: kun je me iets meer vertellen over “${quote}”?`
-        ])
-      );
-    }
-
-    function maybeBecomeFriends() {
-      if (
-        state.phase === 0 &&
-        state.meaningfulMessages >= 12 &&
-        state.days.length >= 2
-      ) {
-        state.phase = 1;
-        return true;
-      }
-
-      return false;
-    }
-
-    document.getElementById("form").addEventListener("submit", event => {
-      event.preventDefault();
-
-      const text = invoer.value.trim();
-      if (!text || stuur.disabled) return;
-
-      showMessage(text, "you");
-      invoer.value = "";
-      stuur.disabled = true;
-
-      if (!state.days.includes(today())) {
-        state.days.push(today());
-      }
-
-      // Heel korte berichtjes vullen de balk niet telkens verder.
-      if (
-        text.length >= 5 &&
-        !/^(hoi|hallo|hey|ja|nee)[!?. ]*$/i.test(text)
-      ) {
-        state.meaningfulMessages++;
-      }
-
-      const becameFriends = maybeBecomeFriends();
-
-      setTimeout(() => {
-        let reply = replyTo(text);
-
-        if (becameFriends) {
-          reply += "\n\nTrouwens, we hebben elkaar nu wat beter leren kennen. Volgens onze tijdlijn zijn we vrienden geworden 🙂";
+        if (!items.length) {
+          speak(
+            "Amelia",
+            "Ik heb nog geen begrippen voor dit vak. " +
+            "Schrijf in een hoofdstuk, schrift of " +
+            "hierboven bijvoorbeeld: " +
+            "'fotosynthese: planten maken glucose met licht'."
+          );
+          return;
         }
 
-        showMessage(reply, "noah");
-        updateTimeline();
-        save();
-        stuur.disabled = false;
-        invoer.focus();
-      }, 500);
-    });
+        const name = $("ameliaSubject")
+          .selectedOptions[0]?.textContent?.trim() ||
+          "dit vak";
 
-    document.getElementById("reset").addEventListener("click", () => {
-      if (!confirm("Wil je het gesprek en de tijdsbalk wissen?")) return;
+        showQuiz(items, `📝 Oefentoets — ${name}`);
 
-      localStorage.removeItem(KEY);
-      state = newState();
-      chat.textContent = "";
+        speak(
+          "Amelia",
+          "Je oefentoets staat klaar onder de chat."
+        );
+      }
 
-      showMessage(
-        "Hey, ik ben Noah 🙂 We kennen elkaar nog niet. Waar wil je over kletsen?",
-        "noah"
+      function makeAmeliaMath() {
+        const items = [];
+        const types = shuffle([
+          "plus", "min", "keer",
+          "delen", "haakjes", "vergelijking"
+        ]);
+
+        for (const type of types) {
+          const a = 4 + Math.floor(Math.random() * 18);
+          const b = 2 + Math.floor(Math.random() * 11);
+
+          if (type === "plus") {
+            items.push({
+              prompt: `Bereken ${a} + ${b}.`,
+              answer: String(a + b),
+              hint: "Splits tientallen en eenheden."
+            });
+          }
+
+          if (type === "min") {
+            items.push({
+              prompt: `Bereken ${a + b} − ${b}.`,
+              answer: String(a),
+              hint: "Denk aan de omgekeerde optelling."
+            });
+          }
+
+          if (type === "keer") {
+            items.push({
+              prompt: `Bereken ${a} × ${b}.`,
+              answer: String(a * b),
+              hint: "Splits een van de getallen."
+            });
+          }
+
+          if (type === "delen") {
+            items.push({
+              prompt: `Bereken ${a * b} ÷ ${b}.`,
+              answer: String(a),
+              hint: `Welk getal maal ${b} is ${a * b}?`
+            });
+          }
+
+          if (type === "haakjes") {
+            items.push({
+              prompt:
+                `Bereken ${a} + (${b} × 2).`,
+              answer: String(a + b * 2),
+              hint: "Reken eerst uit wat tussen haakjes staat."
+            });
+          }
+
+          if (type === "vergelijking") {
+            items.push({
+              prompt:
+                `Los op: x + ${b} = ${a + b}.`,
+              answer: String(a),
+              hint: `Haal ${b} van beide kanten af.`
+            });
+          }
+        }
+
+        showQuiz(items, "🔢 Rekoefeningen");
+
+        speak(
+          "Amelia",
+          "Zes verschillende soorten sommen staan klaar."
+        );
+      }
+
+      $("ameliaSubject").addEventListener(
+        "change",
+        loadAmeliaExtra
       );
 
-      updateTimeline();
-    });
-
-    state.messages.forEach(message => {
-      showMessage(message.text, message.sender, false);
-    });
-
-    if (state.messages.length === 0) {
-      showMessage(
-        "Hey, ik ben Noah 🙂 We kennen elkaar nog niet. Waar wil je over kletsen?",
-        "noah"
+      $("ameliaNotes").addEventListener(
+        "input",
+        saveAmeliaExtra
       );
-    }
 
-    updateTimeline();
+      $("ameliaForm").addEventListener(
+        "submit",
+        event => {
+          event.preventDefault();
+
+          const question =
+            $("ameliaInput").value.trim();
+
+          if (!question) return;
+
+          speak("Jij", question);
+          $("ameliaInput").value = "";
+          answerQuestion(question);
+        }
+      );
+
+      $("makeTest").addEventListener(
+        "click",
+        makeAmeliaTest
+      );
+
+      $("makeMath").addEventListener(
+        "click",
+        makeAmeliaMath
+      );
+
+      $("checkQuiz").addEventListener(
+        "click",
+        () => {
+          let correct = 0;
+
+          [...$("quizQuestions").children]
+            .forEach((box, index) => {
+              const field = box.querySelector("input");
+              const feedback =
+                box.lastElementChild;
+
+              const item = currentQuiz[index];
+
+              if (!field.value.trim()) {
+                feedback.textContent =
+                  "Probeer eerst zelf iets in te vullen.";
+              } else if (
+                normalized(field.value) ===
+                normalized(item.answer)
+              ) {
+                correct++;
+                feedback.textContent = "✅ Goed!";
+              } else {
+                feedback.textContent =
+                  `💡 Nog niet goed. ${item.hint}`;
+              }
+            });
+
+          speak(
+            "Amelia",
+            `${correct} van de ${currentQuiz.length} goed. ` +
+            "Je kunt je antwoorden aanpassen en " +
+            "opnieuw controleren."
+          );
+        }
+      );
+
+      /*
+       * BROODJE PARKOUR
+       */
+      const canvas = $("gameCanvas");
+      const ctx = canvas.getContext("2d");
+
+      const gameKeys = {
+        left: false,
+        right: false,
+        jump: false
+      };
+
+      const platforms = [];
+      const donuts = [];
+      const cones = [];
+
+      let player;
+      let camera = 0;
+      let checkpoint = 0;
+      let score = 0;
+      let falls = 0;
+      let won = false;
+      let lastTime = 0;
+
+      const FINISH = 6200;
+
+      function newGame() {
+        platforms.length = 0;
+        donuts.length = 0;
+        cones.length = 0;
+
+        platforms.push({
+          x: 0,
+          y: 390,
+          w: 360
+        });
+
+        let end = 360;
+        let height = 390;
+        let number = 0;
+
+        while (end < FINISH + 250) {
+          const gap =
+            75 + (number * 31 % 45);
+
+          const width =
+            155 + (number * 47 % 65);
+
+          height = Math.max(
+            290,
+            Math.min(
+              390,
+              height + (number * 43 % 91) - 45
+            )
+          );
+
+          const platform = {
+            x: end + gap,
+            y: height,
+            w: width
+          };
+
+          platforms.push(platform);
+
+          donuts.push({
+            x: platform.x + width / 2,
+            y: height - 58,
+            taken: false
+          });
+
+          if (number % 3 === 1) {
+            cones.push({
+              x: platform.x + width - 49,
+              y: height - 22
+            });
+          }
+
+          end = platform.x + width;
+          number++;
+        }
+
+        player = {
+          x: 60,
+          y: 350,
+          w: 30,
+          h: 40,
+          vx: 0,
+          vy: 0,
+          grounded: false
+        };
+
+        camera = 0;
+        checkpoint = 0;
+        score = 0;
+        falls = 0;
+        won = false;
+
+        $("gameStatus").textContent =
+          "Je bent een broodje. Laat je niet " +
+          "beleggen door een kegel.";
+      }
+
+      function respawn(text) {
+        falls++;
+
+        const safe = platforms[checkpoint];
+        player.x = safe.x + 25;
+        player.y = safe.y - player.h;
+        player.vx = 0;
+        player.vy = 0;
+
+        $("gameStatus").textContent = text;
+      }
+
+      function updateGame() {
+        if (won) return;
+
+        player.vx =
+          (Number(gameKeys.right) -
+           Number(gameKeys.left)) * 5;
+
+        if (gameKeys.jump && player.grounded) {
+          player.vy = -12.8;
+          player.grounded = false;
+        }
+
+        player.x = Math.max(
+          0,
+          player.x + player.vx
+        );
+
+        const oldBottom = player.y + player.h;
+
+        player.vy = Math.min(
+          16,
+          player.vy + 0.62
+        );
+
+        player.y += player.vy;
+        player.grounded = false;
+
+        for (const platform of platforms) {
+          const overlaps =
+            player.x + player.w >
+              platform.x + 4 &&
+            player.x <
+              platform.x + platform.w - 4;
+
+          if (
+            player.vy >= 0 &&
+            overlaps &&
+            oldBottom <= platform.y + 8 &&
+            player.y + player.h >= platform.y
+          ) {
+            player.y = platform.y - player.h;
+            player.vy = 0;
+            player.grounded = true;
+          }
+        }
+
+        if (player.y > 550) {
+          respawn(
+            "Plons! Het water geeft een 2 voor stijl."
+          );
+          return;
+        }
+
+        for (const cone of cones) {
+          if (
+            player.x + player.w > cone.x - 12 &&
+            player.x < cone.x + 12 &&
+            player.y + player.h > cone.y + 5 &&
+            player.y < cone.y + 22
+          ) {
+            respawn(
+              "Au! De verkeerskegel wil geen knuffel."
+            );
+            return;
+          }
+        }
+
+        for (const donut of donuts) {
+          if (
+            !donut.taken &&
+            Math.abs(
+              player.x + player.w / 2 -
+              donut.x
+            ) < 27 &&
+            Math.abs(
+              player.y + player.h / 2 -
+              donut.y
+            ) < 34
+          ) {
+            donut.taken = true;
+            score++;
+
+            $("gameStatus").textContent =
+              "🍩 Snackparkour geslaagd!";
+          }
+        }
+
+        for (
+          let i = checkpoint + 7;
+          i < platforms.length;
+          i += 7
+        ) {
+          if (
+            player.x >=
+            platforms[i].x + 25
+          ) {
+            checkpoint = i;
+
+            $("gameStatus").textContent =
+              "🚩 Checkpoint! Het broodje leeft nog.";
+          }
+        }
+
+        if (player.x >= FINISH) {
+          won = true;
+
+          $("gameStatus").textContent =
+            `🏆 Finish! ${score} donuts ` +
+            `en ${falls} plonsjes.`;
+        }
+
+        camera = Math.max(
+          0,
+          player.x - 210
+        );
+      }
+
+      function drawGame() {
+        const w = canvas.width;
+        const h = canvas.height;
+
+        ctx.fillStyle = "#83d9ff";
+        ctx.fillRect(0, 0, w, h);
+
+        ctx.font = "48px serif";
+        ctx.fillText("☀️", 750, 75);
+
+        for (let i = 0; i < 10; i++) {
+          const x =
+            ((i * 270 - camera * 0.22) %
+              1150 + 1150) %
+            1150 - 70;
+
+          ctx.fillText(
+            "☁️",
+            x,
+            80 + (i % 3) * 55
+          );
+        }
+
+        ctx.fillStyle = "#43b8e4";
+        ctx.fillRect(0, 430, w, 30);
+
+        ctx.save();
+        ctx.translate(-camera, 0);
+
+        for (const platform of platforms) {
+          if (
+            platform.x + platform.w < camera ||
+            platform.x > camera + w
+          ) continue;
+
+          ctx.fillStyle = "#70cc70";
+          ctx.fillRect(
+            platform.x,
+            platform.y,
+            platform.w,
+            12
+          );
+
+          ctx.fillStyle = "#875a43";
+          ctx.fillRect(
+            platform.x,
+            platform.y + 12,
+            platform.w,
+            h - platform.y
+          );
+        }
+
+        for (const donut of donuts) {
+          if (!donut.taken) {
+            ctx.font = "30px serif";
+            ctx.fillText(
+              "🍩",
+              donut.x - 17,
+              donut.y + 10
+            );
+          }
+        }
+
+        for (const cone of cones) {
+          ctx.font = "27px serif";
+          ctx.fillText(
+            "🚧",
+            cone.x - 17,
+            cone.y + 22
+          );
+        }
+
+        if (checkpoint > 0) {
+          const safe = platforms[checkpoint];
+          ctx.font = "36px serif";
+          ctx.fillText(
+            "🚩",
+            safe.x + 10,
+            safe.y - 10
+          );
+        }
+
+        ctx.font = "43px serif";
+        ctx.fillText(
+          "🥪",
+          player.x - 8,
+          player.y + 39
+        );
+
+        ctx.font = "45px serif";
+        ctx.fillText(
+          "🏁",
+          FINISH,
+          305
+        );
+
+        ctx.restore();
+
+        ctx.fillStyle = "#102b30dd";
+        ctx.fillRect(10, 10, 280, 46);
+
+        ctx.fillStyle = "#ffffff";
+        ctx.font = "bold 18px system-ui";
+
+        ctx.fillText(
+          `🍩 ${score}   💦 ${falls}   🏁 ` +
+          `${Math.min(
+            100,
+            Math.floor(
+              player.x / FINISH * 100
+            )
+          )}%`,
+          23,
+          40
+        );
+
+        if (won) {
+          ctx.fillStyle = "#102b30dd";
+          ctx.fillRect(0, 0, w, h);
+
+          ctx.fillStyle = "white";
+          ctx.textAlign = "center";
+          ctx.font = "bold 42px system-ui";
+
+          ctx.fillText(
+            "🥪 BROODJE-KAMPIOEN! 🏆",
+            w / 2,
+            220
+          );
+
+          ctx.textAlign = "left";
+        }
+      }
+
+      function gameLoop(time) {
+        requestAnimationFrame(gameLoop);
+
+        if ($("parkour").hidden) {
+          lastTime = time;
+          return;
+        }
+
+        if (time - lastTime < 1000 / 60) {
+          return;
+        }
+
+        lastTime = time;
+        updateGame();
+        drawGame();
+      }
+
+      const controls = {
+        ArrowLeft: "left",
+        KeyA: "left",
+        ArrowRight: "right",
+        KeyD: "right",
+        ArrowUp: "jump",
+        KeyW: "jump",
+        Space: "jump"
+      };
+
+      window.addEventListener("keydown", event => {
+        if ($("parkour").hidden) return;
+
+        if (
+          event.target.closest(
+            "input, textarea, select"
+          )
+        ) return;
+
+        const control = controls[event.code];
+        if (!control) return;
+
+        event.preventDefault();
+        gameKeys[control] = true;
+      });
+
+      window.addEventListener("keyup", event => {
+        const control = controls[event.code];
+
+        if (control) {
+          gameKeys[control] = false;
+        }
+      });
+
+      window.addEventListener("blur", () => {
+        gameKeys.left = false;
+        gameKeys.right = false;
+        gameKeys.jump = false;
+      });
+
+      for (const [buttonId, control] of [
+        ["gameLeft", "left"],
+        ["gameRight", "right"],
+        ["gameJump", "jump"]
+      ]) {
+        const button = $(buttonId);
+
+        button.addEventListener(
+          "pointerdown",
+          event => {
+            event.preventDefault();
+            button.setPointerCapture(
+              event.pointerId
+            );
+            gameKeys[control] = true;
+          }
+        );
+
+        for (const type of [
+          "pointerup",
+          "pointercancel",
+          "lostpointercapture"
+        ]) {
+          button.addEventListener(
+            type,
+            () => {
+              gameKeys[control] = false;
+            }
+          );
+        }
+      }
+
+      $("gameRestart").addEventListener(
+        "click",
+        newGame
+      );
+
+      window.addEventListener(
+        "beforeunload",
+        flushSave
+      );
+
+      load();
+      renderOverview();
+      loadAmeliaSubjects();
+      newGame();
+      requestAnimationFrame(gameLoop);
+
+      speak(
+        "Amelia",
+        "Hoi! Kies een vak en stel een vraag " +
+        "over je ATLAS-notities, of vraag me " +
+        "een oefentoets te maken."
+      );
+    })();
   </script>
 </body>
 </html>
