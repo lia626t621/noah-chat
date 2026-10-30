@@ -1,0 +1,1828 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Skyline Air — Cockpit & Cabine</title>
+
+  <style>
+    :root {
+      --bg: #07121e;
+      --panel: #152638;
+      --panel2: #20374a;
+      --panel3: #0c1a28;
+      --border: #496376;
+      --text: #f0f7fc;
+      --muted: #acc3d1;
+      --green: #81ecaf;
+      --amber: #ffce75;
+      --red: #ff7886;
+      --blue: #79d9ff;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      font-family: Arial, sans-serif;
+      background: radial-gradient(circle at top, #244762, var(--bg) 75%);
+    }
+
+    button, input { font: inherit; }
+
+    button {
+      min-height: 41px;
+      padding: 9px 11px;
+      color: white;
+      background: #35556d;
+      border: 1px solid #7591a055;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      touch-action: none;
+    }
+
+    button:hover { filter: brightness(1.17); }
+    button.on { background: #206f58; border-color: var(--green); }
+    button.warn { background: #805c2b; }
+    button.red { background: #86414c; }
+    button.selected { outline: 2px solid var(--amber); }
+
+    button:disabled {
+      opacity: .48;
+      cursor: not-allowed;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--blue);
+    }
+
+    .app {
+      width: min(1510px, 100%);
+      margin: auto;
+      padding: 12px;
+    }
+
+    header, .card {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      padding: 14px;
+      margin-bottom: 12px;
+    }
+
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    h1 { margin: 2px 0; font-size: clamp(26px, 4vw, 41px); }
+    h2 { margin: 0 0 12px; font-size: 20px; }
+    h3 { margin: 0 0 9px; font-size: 16px; }
+    p { line-height: 1.45; }
+    small, .muted { color: var(--muted); }
+    .tag { color: var(--amber); font-weight: bold; letter-spacing: 2px; }
+
+    .buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 7px;
+    }
+
+    .layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 300px;
+      gap: 12px;
+    }
+
+    [hidden] { display: none !important; }
+
+    .cockpit-glass {
+      overflow: hidden;
+      border: 6px solid #334455;
+      border-radius: 16px 16px 7px 7px;
+      background: #80bce0;
+    }
+
+    canvas {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+
+    .dashboard {
+      padding: 13px;
+      border: 2px solid #4f6576;
+      border-radius: 0 0 16px 16px;
+      background:
+        linear-gradient(145deg, #263d4e, #0b1521 70%);
+      box-shadow: inset 0 10px 24px #0007;
+    }
+
+    .gauges {
+      display: grid;
+      grid-template-columns: repeat(6, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .gauge {
+      min-width: 0;
+      padding: 10px 6px;
+      text-align: center;
+      background: #07131d;
+      border: 2px solid #506476;
+      border-radius: 12px;
+      box-shadow: inset 0 0 12px #000;
+    }
+
+    .gauge span {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .gauge strong {
+      display: block;
+      margin-top: 6px;
+      color: var(--green);
+      font-size: clamp(16px, 2vw, 25px);
+      overflow-wrap: anywhere;
+    }
+
+    .gauge.warn strong { color: var(--amber); }
+
+    .pilot-workspace {
+      display: grid;
+      grid-template-columns: minmax(240px, 1fr) minmax(240px, 1fr);
+      gap: 12px;
+      margin-top: 13px;
+    }
+
+    .console {
+      padding: 12px;
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      background: #14283a;
+    }
+
+    .switch-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
+    }
+
+    .switch-grid button {
+      min-width: 0;
+      font-size: 12px;
+    }
+
+    .full { grid-column: 1 / -1; }
+
+    .yoke-area {
+      position: relative;
+      height: 190px;
+      overflow: hidden;
+      border: 2px solid #52687a;
+      border-radius: 20px;
+      background:
+        radial-gradient(circle at center, #314b60 0 4%, transparent 5%),
+        linear-gradient(90deg, transparent 49.7%, #587388 50%, transparent 50.3%),
+        linear-gradient(0deg, transparent 49.7%, #587388 50%, transparent 50.3%),
+        #091a28;
+      touch-action: none;
+      user-select: none;
+      cursor: grab;
+    }
+
+    .yoke-area:active { cursor: grabbing; }
+
+    .yoke {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 152px;
+      height: 104px;
+      transform: translate(-50%, -50%);
+      pointer-events: none;
+      transition: none;
+    }
+
+    .yoke-wheel {
+      position: absolute;
+      left: 6px;
+      top: 0;
+      width: 140px;
+      height: 86px;
+      border: 14px solid #b5c2c9;
+      border-bottom-width: 20px;
+      border-radius: 55% 55% 42% 42%;
+      box-shadow: 0 4px 8px #000a, inset 0 0 8px #000a;
+    }
+
+    .yoke-hub {
+      position: absolute;
+      left: 51px;
+      top: 38px;
+      width: 50px;
+      height: 44px;
+      border: 5px solid #829ba8;
+      border-radius: 50%;
+      background: #172936;
+      display: grid;
+      place-items: center;
+      color: var(--amber);
+      font-size: 19px;
+      font-weight: bold;
+    }
+
+    .yoke-stem {
+      position: absolute;
+      left: 69px;
+      top: 75px;
+      width: 14px;
+      height: 33px;
+      background: #93a6b0;
+    }
+
+    .yoke-keys {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+      margin-top: 9px;
+    }
+
+    .yoke-keys button {
+      padding: 8px 3px;
+      font-size: 12px;
+    }
+
+    .levers {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 15px;
+    }
+
+    .lever {
+      padding: 10px;
+      background: var(--panel3);
+      border-radius: 9px;
+    }
+
+    .lever strong {
+      display: block;
+      margin-bottom: 8px;
+      color: var(--amber);
+    }
+
+    .lever input {
+      margin: 10px 0;
+    }
+
+    .radio {
+      min-height: 72px;
+      padding: 12px;
+      color: var(--amber);
+      background: #1b3444;
+      border-left: 4px solid var(--amber);
+      border-radius: 6px;
+      line-height: 1.4;
+    }
+
+    .check {
+      padding: 8px 0;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    .check:last-child { border: 0; }
+
+    .cabin-scene {
+      padding: 15px;
+      border-radius: 13px;
+      background: repeating-linear-gradient(
+        90deg,
+        #203c53 0 110px,
+        #29465b 110px 120px
+      );
+    }
+
+    .passengers {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+    }
+
+    .passenger {
+      padding: 13px;
+      background: #102838;
+      border: 1px solid #6b8999;
+      border-radius: 11px;
+    }
+
+    .passenger.done { border-color: var(--green); }
+    .passenger button { width: 100%; margin-top: 8px; }
+
+    .phase {
+      padding: 8px;
+      border-radius: 8px;
+      background: #0a1c29;
+      color: var(--blue);
+      font-weight: bold;
+    }
+
+    @media (max-width: 1080px) {
+      .layout { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 720px) {
+      .app { padding: 7px; }
+      header, .card { padding: 10px; }
+      .gauges { grid-template-columns: repeat(3, 1fr); }
+      .pilot-workspace { grid-template-columns: 1fr; }
+      .passengers { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="app">
+    <header>
+      <div>
+        <div class="tag">SKYLINE AIR · FLIGHT CREW SIM</div>
+        <h1>✈️ Cockpit & Cabine</h1>
+        <small>Bestuur het vliegtuig én help de passagiers.</small>
+      </div>
+
+      <div class="buttons">
+        <button id="tabCockpit">🛫 Cockpit</button>
+        <button id="tabCabin">👩‍✈️ Stewardess</button>
+        <button id="newFlight" class="warn">Nieuwe vlucht</button>
+      </div>
+    </header>
+
+    <div class="layout">
+      <main>
+        <section id="cockpitView" hidden>
+          <div class="card">
+            <h2>Voorruit & instrumentenpaneel</h2>
+
+            <div class="cockpit-glass">
+              <canvas id="outside" width="1000" height="360"></canvas>
+            </div>
+
+            <div class="dashboard">
+              <div class="gauges">
+                <div class="gauge">
+                  <span>SNELHEID</span>
+                  <strong id="gSpeed">0 kn</strong>
+                </div>
+                <div class="gauge">
+                  <span>HOOGTE</span>
+                  <strong id="gAltitude">0 m</strong>
+                </div>
+                <div class="gauge">
+                  <span>STIJGEN / DALEN</span>
+                  <strong id="gVertical">0 m/s</strong>
+                </div>
+                <div class="gauge">
+                  <span>KOERS</span>
+                  <strong id="gHeading">090°</strong>
+                </div>
+                <div class="gauge">
+                  <span>AFSTAND</span>
+                  <strong id="gDistance">0,0 km</strong>
+                </div>
+                <div class="gauge">
+                  <span>BRANDSTOF</span>
+                  <strong id="gFuel">100%</strong>
+                </div>
+              </div>
+
+              <div class="pilot-workspace">
+                <div class="console">
+                  <h3>🎮 Vliegtuigstuur</h3>
+
+                  <div
+                    id="yokeArea"
+                    class="yoke-area"
+                    aria-label="Beweegbaar vliegtuigstuur"
+                  >
+                    <div id="yoke" class="yoke">
+                      <div class="yoke-wheel"></div>
+                      <div class="yoke-stem"></div>
+                      <div class="yoke-hub">✈</div>
+                    </div>
+                  </div>
+
+                  <small>
+                    Sleep het stuur: omhoog = neus omhoog,
+                    omlaag = neus omlaag, links/rechts = draaien.
+                    Je kunt ook de knoppen hieronder vasthouden.
+                  </small>
+
+                  <div class="yoke-keys">
+                    <button data-hold="left">◀ Links</button>
+                    <button data-hold="up">▲ Omhoog</button>
+                    <button data-hold="down">▼ Omlaag</button>
+                    <button data-hold="right">Rechts ▶</button>
+                  </div>
+
+                  <p>
+                    Stand stuur:
+                    <strong id="yokeStatus">Neutraal</strong>
+                  </p>
+                </div>
+
+                <div class="console">
+                  <h3>⚙️ Middenconsole</h3>
+
+                  <div class="levers">
+                    <div class="lever">
+                      <strong>Gashendel: <span id="throttleText">0%</span></strong>
+                      <input
+                        id="throttle"
+                        type="range"
+                        min="0"
+                        max="100"
+                        value="0"
+                      >
+                      <small>Meer gas = meer snelheid</small>
+                    </div>
+
+                    <div class="lever">
+                      <strong>Trim: <span id="trimText">0</span></strong>
+                      <input
+                        id="trim"
+                        type="range"
+                        min="-5"
+                        max="5"
+                        value="0"
+                      >
+                      <small>Kleine correctie van de neusstand</small>
+                    </div>
+                  </div>
+
+                  <div class="switch-grid" style="margin-top:11px">
+                    <button id="battery">Batterij: UIT</button>
+                    <button id="apu">APU: UIT</button>
+                    <button id="fuelPump">Brandstofpomp: UIT</button>
+                    <button id="engines">Motoren: UIT</button>
+                    <button id="parkingBrake">Parkeerrem: AAN</button>
+                    <button id="flaps">Flaps: 0°</button>
+                    <button id="gear">Gestel: UIT</button>
+                    <button id="spoilers">Spoilers: IN</button>
+                  </div>
+                </div>
+
+                <div class="console">
+                  <h3>💡 Overheadpaneel</h3>
+
+                  <div class="switch-grid">
+                    <button id="beacon">Beacon: UIT</button>
+                    <button id="navLights">Navigatielicht: UIT</button>
+                    <button id="taxiLights">Taxilicht: UIT</button>
+                    <button id="landingLights">Landingslicht: UIT</button>
+                    <button id="strobe">Strobe: UIT</button>
+                    <button id="antiIce">Anti-ice: UIT</button>
+                    <button id="cabinPressure">Cabinedruk: UIT</button>
+                    <button id="wipers">Ruitenwissers: UIT</button>
+                  </div>
+
+                  <p class="muted">
+                    Sommige schakelaars geven extra score of informatie;
+                    niet elke schakelaar is verplicht om te vliegen.
+                  </p>
+                </div>
+
+                <div class="console">
+                  <h3>🧭 Automatische piloot & radio</h3>
+
+                  <div class="switch-grid">
+                    <button id="autopilot" class="full">
+                      Automatische piloot: UIT
+                    </button>
+                    <button id="altMinus">Doelhoogte −50 m</button>
+                    <button id="altPlus">Doelhoogte +50 m</button>
+                    <button id="atc">📻 Verkeersleiding</button>
+                    <button id="mapButton">🗺️ Route-informatie</button>
+                  </div>
+
+                  <p>
+                    AP-doelhoogte:
+                    <strong id="targetAltitude">250 m</strong>
+                  </p>
+
+                  <p class="muted">
+                    Zet de automatische piloot aan voordat je tijdens
+                    de vlucht naar de cabine gaat.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section id="cabinView">
+          <div class="card">
+            <h2>👩‍✈️ Jij bent de stewardess</h2>
+
+            <p id="cabinText">
+              Maak de cabine klaar voordat de piloot de motoren start.
+            </p>
+
+            <div class="switch-grid">
+              <button id="bags">Bagage controleren</button>
+              <button id="safety">Veiligheidsuitleg geven</button>
+              <button id="seatbelts">Riemenlampje: UIT</button>
+              <button id="door">Cabinedeur: OPEN</button>
+            </div>
+
+            <p class="muted">
+              Na het opstijgen: automatische piloot aanzetten,
+              terug naar de cabine en de passagiers helpen.
+            </p>
+          </div>
+
+          <div class="card">
+            <h2>🧑‍🤝‍🧑 Passagierscabine</h2>
+            <div class="cabin-scene">
+              <div id="passengers" class="passengers"></div>
+            </div>
+          </div>
+        </section>
+      </main>
+
+      <aside>
+        <div class="card">
+          <h2>📍 Vlucht</h2>
+          <div class="phase" id="phase">Voorbereiding</div>
+          <p>Sunport → Bluebay Airport</p>
+          <p>
+            Route: <strong>18 km</strong><br>
+            Landingsgebied: <strong>15–19 km</strong>
+          </p>
+          <p>Score: <strong id="score">0</strong></p>
+          <p>Record: <strong id="record">0</strong></p>
+        </div>
+
+        <div class="card">
+          <h2>📋 Checklist</h2>
+          <div id="checklist"></div>
+        </div>
+
+        <div class="card">
+          <h2>📻 Berichten</h2>
+          <div id="message" class="radio">
+            Welkom aan boord! Begin in de cabine.
+          </div>
+        </div>
+
+        <div class="card">
+          <h2>🛫 Snelle start</h2>
+          <ol style="padding-left:20px; line-height:1.6; font-size:14px">
+            <li>Cabine: bagage, uitleg, riemenlampje, deur.</li>
+            <li>Cockpit: batterij, APU en brandstofpomp AAN.</li>
+            <li>Start motoren en zet flaps op 10°.</li>
+            <li>Parkeerrem UIT en gashendel op 100%.</li>
+            <li>
+              Houd vanaf 100 kn het stuur
+              <strong>omhoog</strong>. Dan stijg je op.
+            </li>
+            <li>Zet AP aan en help de passagiers.</li>
+          </ol>
+          <small>
+            Arcade-simulator: geen echte vliegopleiding of handleiding
+            voor een werkelijk vliegtuig.
+          </small>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <script>
+    "use strict";
+
+    const $ = id => document.getElementById(id);
+    const canvas = $("outside");
+    const ctx = canvas.getContext("2d");
+    const SAVE_KEY = "skyline-cockpit-record-v1";
+
+    const hold = {
+      up: false,
+      down: false,
+      left: false,
+      right: false
+    };
+
+    const people = [
+      { name: "Mila", request: "water" },
+      { name: "Noah", request: "een maaltijd" },
+      { name: "Sofia", request: "een dekentje" },
+      { name: "Luca", request: "water" },
+      { name: "Amira", request: "een maaltijd" },
+      { name: "Finn", request: "een dekentje" }
+    ];
+
+    function clamp(n, min, max) {
+      return Math.max(min, Math.min(max, n));
+    }
+
+    function readRecord() {
+      try {
+        return Number(localStorage.getItem(SAVE_KEY)) || 0;
+      } catch {
+        return 0;
+      }
+    }
+
+    let record = readRecord();
+
+    function makeGame() {
+      return {
+        view: "cabin",
+        phase: "ground",
+        score: 0,
+        time: 0,
+        lastHint: -10,
+
+        battery: false,
+        apu: false,
+        fuelPump: false,
+        engines: false,
+        parkingBrake: true,
+
+        flaps: 0,
+        gear: true,
+        spoilers: false,
+
+        beacon: false,
+        navLights: false,
+        taxiLights: false,
+        landingLights: false,
+        strobe: false,
+        antiIce: false,
+        cabinPressure: false,
+        wipers: false,
+
+        autopilot: false,
+        targetAltitude: 250,
+
+        bags: false,
+        safety: false,
+        seatbelts: false,
+        doorClosed: false,
+
+        throttle: 0,
+        trim: 0,
+        speed: 0,
+        altitude: 0,
+        vertical: 0,
+        heading: 90,
+        distance: 0,
+        fuel: 100,
+
+        pitch: 0,
+        bank: 0,
+        yokePitch: 0,
+        yokeBank: 0,
+        draggingYoke: false,
+
+        passengers: people.map(person => ({
+          ...person,
+          served: false
+        }))
+      };
+    }
+
+    let game = makeGame();
+    let lastFrame = performance.now();
+
+    function say(text) {
+      $("message").textContent = text;
+    }
+
+    function hint(text) {
+      if (game.time - game.lastHint < 4) return;
+      game.lastHint = game.time;
+      say(text);
+    }
+
+    function cabinReady() {
+      return game.bags &&
+        game.safety &&
+        game.seatbelts &&
+        game.doorClosed;
+    }
+
+    function servedCount() {
+      return game.passengers.filter(p => p.served).length;
+    }
+
+    function setView(view) {
+      if (
+        view === "cabin" &&
+        game.phase === "air" &&
+        !game.autopilot
+      ) {
+        say(
+          "Zet eerst de automatische piloot aan voordat " +
+          "je de cockpit verlaat."
+        );
+        return;
+      }
+
+      game.view = view;
+
+      $("cockpitView").hidden = view !== "cockpit";
+      $("cabinView").hidden = view !== "cabin";
+
+      $("tabCockpit").classList.toggle(
+        "selected",
+        view === "cockpit"
+      );
+
+      $("tabCabin").classList.toggle(
+        "selected",
+        view === "cabin"
+      );
+
+      releaseYoke();
+      renderCabin();
+    }
+
+    function toggle(name, label) {
+      if (game.phase === "landed" || game.phase === "crashed") return;
+
+      game[name] = !game[name];
+      say(`${label}: ${game[name] ? "AAN" : "UIT"}.`);
+      renderButtons();
+    }
+
+    function startEngines() {
+      if (game.phase !== "ground") {
+        say("Tijdens deze vlucht blijven de motoren draaien.");
+        return;
+      }
+
+      if (game.engines) {
+        game.engines = false;
+        game.throttle = 0;
+        $("throttle").value = 0;
+        say("Motoren uitgeschakeld.");
+        renderButtons();
+        return;
+      }
+
+      if (!cabinReady()) {
+        say("Maak eerst de cabine klaar: vier controles ontbreken nog.");
+        return;
+      }
+
+      if (!game.battery || !game.apu || !game.fuelPump) {
+        say(
+          "Voor deze game: zet batterij, APU en brandstofpomp AAN."
+        );
+        return;
+      }
+
+      game.engines = true;
+      game.score += 50;
+      say(
+        "Motoren draaien! Flaps 10°, parkeerrem UIT, gas omhoog."
+      );
+      renderButtons();
+    }
+
+    function finish(success, reason) {
+      if (game.phase === "landed" || game.phase === "crashed") return;
+
+      game.phase = success ? "landed" : "crashed";
+      game.autopilot = false;
+      game.throttle = 0;
+      game.engines = false;
+
+      $("throttle").value = 0;
+      releaseYoke();
+
+      if (success) {
+        game.score += 500 + servedCount() * 40;
+
+        if (game.score > record) {
+          record = game.score;
+
+          try {
+            localStorage.setItem(SAVE_KEY, String(record));
+          } catch {}
+        }
+
+        say(
+          `🛬 Veilig geland! ${servedCount()}/6 passagiers geholpen. ` +
+          `Score: ${game.score}. ${reason}`
+        );
+      } else {
+        say(`⚠️ Vlucht voorbij: ${reason} Probeer een nieuwe vlucht.`);
+      }
+
+      renderCabin();
+      renderButtons();
+    }
+
+    function setYokeFromPointer(event) {
+      const area = $("yokeArea");
+      const rect = area.getBoundingClientRect();
+
+      const relativeX =
+        (event.clientX - rect.left - rect.width / 2) /
+        (rect.width / 2);
+
+      const relativeY =
+        (event.clientY - rect.top - rect.height / 2) /
+        (rect.height / 2);
+
+      game.yokeBank = clamp(relativeX * 28, -28, 28);
+      game.yokePitch = clamp(-relativeY * 16, -16, 16);
+
+      updateYokeVisual();
+    }
+
+    function releaseYoke() {
+      game.draggingYoke = false;
+      game.yokePitch = 0;
+      game.yokeBank = 0;
+
+      for (const key of Object.keys(hold)) {
+        hold[key] = false;
+      }
+
+      updateYokeVisual();
+    }
+
+    function updateYokeVisual() {
+      const x = game.yokeBank / 28 * 70;
+      const y = -game.yokePitch / 16 * 45;
+
+      $("yoke").style.transform =
+        `translate(calc(-50% + ${x}px), calc(-50% + ${y}px)) ` +
+        `rotate(${game.yokeBank * 0.85}deg)`;
+
+      const pitchLabel =
+        game.yokePitch > 3
+          ? "neus omhoog"
+          : game.yokePitch < -3
+            ? "neus omlaag"
+            : "neus neutraal";
+
+      const turnLabel =
+        game.yokeBank > 5
+          ? "rechts"
+          : game.yokeBank < -5
+            ? "links"
+            : "rechtdoor";
+
+      $("yokeStatus").textContent =
+        `${pitchLabel} · ${turnLabel}`;
+    }
+
+    function applyHeldControls(dt) {
+      if (game.draggingYoke) return;
+
+      if (hold.up) {
+        game.yokePitch = clamp(
+          game.yokePitch + 24 * dt,
+          -16,
+          16
+        );
+      } else if (hold.down) {
+        game.yokePitch = clamp(
+          game.yokePitch - 24 * dt,
+          -16,
+          16
+        );
+      } else {
+        game.yokePitch *= Math.max(0, 1 - 4 * dt);
+      }
+
+      if (hold.right) {
+        game.yokeBank = clamp(
+          game.yokeBank + 48 * dt,
+          -28,
+          28
+        );
+      } else if (hold.left) {
+        game.yokeBank = clamp(
+          game.yokeBank - 48 * dt,
+          -28,
+          28
+        );
+      } else {
+        game.yokeBank *= Math.max(0, 1 - 5 * dt);
+      }
+
+      updateYokeVisual();
+    }
+
+    function updateFlight(dt) {
+      if (game.phase === "landed" || game.phase === "crashed") return;
+
+      game.time += dt;
+      applyHeldControls(dt);
+
+      if (game.engines && game.fuel > 0) {
+        game.fuel = Math.max(
+          0,
+          game.fuel -
+          dt * (0.025 + game.throttle * 0.00055)
+        );
+
+        const target =
+          game.throttle / 100 *
+          (game.phase === "ground" ? 160 : 225);
+
+        game.speed +=
+          (target - game.speed) *
+          dt *
+          (game.phase === "ground" ? 0.35 : 0.26);
+      } else {
+        game.speed -=
+          (game.phase === "ground" ? 18 : 10) * dt;
+      }
+
+      if (game.parkingBrake && game.phase === "ground") {
+        game.speed -= 110 * dt;
+      }
+
+      if (game.spoilers) {
+        game.speed -= (game.phase === "ground" ? 55 : 18) * dt;
+      }
+
+      if (game.flaps === 20) {
+        game.speed -= 3 * dt;
+      }
+
+      game.speed = clamp(game.speed, 0, 240);
+
+      if (game.fuel <= 0) {
+        game.engines = false;
+        game.throttle = 0;
+        $("throttle").value = 0;
+      }
+
+      if (game.phase === "ground") {
+        game.pitch +=
+          (game.yokePitch + game.trim * 0.5 - game.pitch) *
+          Math.min(1, dt * 5);
+
+        game.bank +=
+          (game.yokeBank - game.bank) *
+          Math.min(1, dt * 4);
+
+        game.altitude = 0;
+        game.vertical = 0;
+
+        if (
+          game.engines &&
+          cabinReady() &&
+          !game.parkingBrake &&
+          !game.spoilers &&
+          game.flaps >= 10 &&
+          game.speed >= 100 &&
+          game.pitch >= 7
+        ) {
+          game.phase = "air";
+          game.altitude = 5;
+          game.vertical = 9;
+          game.score += 150;
+
+          say(
+            "✈️ Je bent opgestegen! Trek het landingsgestel in. " +
+            "Zet daarna AP aan om naar de cabine te gaan."
+          );
+        } else if (game.speed >= 85) {
+          if (game.flaps < 10) {
+            hint("Zet de flaps op 10°.");
+          } else if (game.parkingBrake) {
+            hint("De parkeerrem staat nog AAN.");
+          } else if (game.spoilers) {
+            hint("Zet de spoilers IN.");
+          } else if (game.pitch < 7) {
+            hint(
+              "Trek het stuur omhoog of houd ▲ Omhoog ingedrukt!"
+            );
+          }
+        }
+
+        return;
+      }
+
+      if (game.autopilot) {
+        const heightError =
+          game.targetAltitude - game.altitude;
+
+        const wantedPitch = clamp(
+          heightError / 28,
+          -7,
+          7
+        );
+
+        game.pitch +=
+          (wantedPitch - game.pitch) *
+          Math.min(1, dt * 1.4);
+
+        game.bank *= Math.max(0, 1 - 3 * dt);
+      } else {
+        const wantedPitch =
+          game.yokePitch + game.trim * 0.7;
+
+        game.pitch +=
+          (wantedPitch - game.pitch) *
+          Math.min(1, dt * 2.1);
+
+        game.bank +=
+          (game.yokeBank - game.bank) *
+          Math.min(1, dt * 2.2);
+      }
+
+      game.heading =
+        (game.heading + game.bank * dt * 0.1 + 360) % 360;
+
+      const lowSpeedPenalty =
+        game.speed < 85
+          ? (85 - game.speed) * 0.34
+          : 0;
+
+      game.vertical =
+        game.pitch * 1.55 -
+        lowSpeedPenalty -
+        (game.speed < 55 ? 11 : 0);
+
+      game.altitude += game.vertical * dt;
+
+      // De spelwereld is versneld zodat de route speelbaar blijft.
+      game.distance += game.speed * 0.0014 * dt;
+
+      if (game.speed < 85 && game.altitude > 20) {
+        hint(
+          "⚠️ Je vliegt te langzaam. Geef gas en laat de neus zakken."
+        );
+      }
+
+      if (game.distance >= 12 && game.distance < 12.2) {
+        hint(
+          "Bluebay nadert! Ga naar de cockpit en begin rustig te dalen."
+        );
+      }
+
+      if (game.distance > 19.3) {
+        finish(
+          false,
+          "Je vloog voorbij Bluebay zonder te landen."
+        );
+        return;
+      }
+
+      if (game.altitude <= 0) {
+        game.altitude = 0;
+
+        const safe =
+          game.distance >= 15 &&
+          game.distance <= 19 &&
+          game.gear &&
+          game.flaps === 20 &&
+          game.speed >= 70 &&
+          game.speed <= 155 &&
+          game.vertical > -14 &&
+          Math.abs(game.bank) < 15;
+
+        if (safe) {
+          finish(true, "Goed gedaan als piloot én stewardess!");
+        } else {
+          finish(
+            false,
+            "De landing was buiten het landingsgebied of " +
+            "snelheid, daalsnelheid, flaps, stuurstand of " +
+            "landingsgestel waren niet goed."
+          );
+        }
+      }
+    }
+
+    function drawOutside() {
+      const w = canvas.width;
+      const h = canvas.height;
+
+      ctx.clearRect(0, 0, w, h);
+
+      const horizon =
+        h * 0.54 + game.pitch * 8;
+
+      ctx.save();
+      ctx.translate(w / 2, horizon);
+      ctx.rotate(-game.bank * Math.PI / 180);
+
+      ctx.fillStyle = "#83c7ed";
+      ctx.fillRect(-1300, -1300, 2600, 1300);
+
+      ctx.fillStyle = "#51855b";
+      ctx.fillRect(-1300, 0, 2600, 1300);
+
+      ctx.fillStyle = "#f4f4e5";
+      ctx.fillRect(-1300, -2, 2600, 4);
+
+      ctx.restore();
+
+      if (game.phase === "ground") {
+        ctx.fillStyle = "#4a4b4c";
+        ctx.beginPath();
+        ctx.moveTo(420, h);
+        ctx.lineTo(480, 210);
+        ctx.lineTo(520, 210);
+        ctx.lineTo(580, h);
+        ctx.fill();
+
+        ctx.strokeStyle = "#f5f3d9";
+        ctx.lineWidth = 5;
+        ctx.setLineDash([17, 18]);
+        ctx.beginPath();
+        ctx.moveTo(500, 217);
+        ctx.lineTo(500, h);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      if (
+        game.phase === "air" &&
+        game.distance > 11
+      ) {
+        const closeness = clamp(
+          (game.distance - 11) / 8,
+          0,
+          1
+        );
+
+        const width = 25 + closeness * 175;
+        const topY = 250;
+
+        ctx.fillStyle = "#3e454b";
+        ctx.beginPath();
+        ctx.moveTo(485, topY);
+        ctx.lineTo(515, topY);
+        ctx.lineTo(500 + width, h);
+        ctx.lineTo(500 - width, h);
+        ctx.fill();
+
+        ctx.strokeStyle = "#f5f4e8";
+        ctx.lineWidth = 3;
+        ctx.setLineDash([12, 12]);
+        ctx.beginPath();
+        ctx.moveTo(500, topY + 10);
+        ctx.lineTo(500, h);
+        ctx.stroke();
+        ctx.setLineDash([]);
+      }
+
+      // Vaste markering in het midden van de voorruit.
+      ctx.strokeStyle = "#ffe396";
+      ctx.lineWidth = 5;
+      ctx.beginPath();
+      ctx.moveTo(385, h / 2);
+      ctx.lineTo(465, h / 2);
+      ctx.lineTo(500, h / 2 + 11);
+      ctx.lineTo(535, h / 2);
+      ctx.lineTo(615, h / 2);
+      ctx.stroke();
+
+      ctx.fillStyle = "#061722bb";
+      ctx.fillRect(15, 15, 250, 67);
+
+      ctx.fillStyle = "#ffffff";
+      ctx.font = "bold 20px Arial";
+      ctx.fillText("SKYLINE AIR", 28, 43);
+
+      ctx.font = "14px Arial";
+      ctx.fillText(
+        `NEUS ${game.pitch.toFixed(0)}°   ` +
+        `HELLING ${game.bank.toFixed(0)}°`,
+        28,
+        68
+      );
+
+      if (game.autopilot) {
+        ctx.fillStyle = "#133c2cdd";
+        ctx.fillRect(w - 180, 15, 165, 42);
+
+        ctx.fillStyle = "#9af4bb";
+        ctx.font = "bold 17px Arial";
+        ctx.fillText("AP ACTIEF", w - 161, 42);
+      }
+
+      if (
+        game.phase === "landed" ||
+        game.phase === "crashed"
+      ) {
+        ctx.fillStyle = "#07121ecc";
+        ctx.fillRect(0, h - 72, w, 72);
+
+        ctx.textAlign = "center";
+        ctx.font = "bold 30px Arial";
+        ctx.fillStyle =
+          game.phase === "landed"
+            ? "#9af4bb"
+            : "#ff8e9b";
+
+        ctx.fillText(
+          game.phase === "landed"
+            ? "VEILIG GELAND!"
+            : "VLUCHT VOORBIJ",
+          w / 2,
+          h - 26
+        );
+
+        ctx.textAlign = "left";
+      }
+    }
+
+    function renderCabin() {
+      $("cabinText").textContent =
+        game.phase === "ground"
+          ? "Maak eerst de cabine veilig voor vertrek."
+          : game.phase === "air"
+            ? `Je bent in de lucht. ${servedCount()}/6 ` +
+              "passagiers zijn geholpen."
+            : game.phase === "landed"
+              ? "Welkom op Bluebay! De passagiers stappen straks uit."
+              : "Begin een nieuwe vlucht om het opnieuw te proberen.";
+
+      $("passengers").innerHTML =
+        game.passengers.map((p, index) => `
+          <div class="passenger ${p.served ? "done" : ""}">
+            <div style="font-size:29px">
+              ${p.served ? "😊" : "🧑"}
+            </div>
+
+            <strong>Rij ${index + 1} · ${p.name}</strong>
+
+            <p class="muted">
+              ${
+                p.served
+                  ? "Geholpen. Dank je!"
+                  : game.phase === "air"
+                    ? `Wil graag ${p.request}.`
+                    : "Wacht op de vlucht."
+              }
+            </p>
+
+            <button
+              data-serve="${index}"
+              ${
+                p.served || game.phase !== "air"
+                  ? "disabled"
+                  : ""
+              }
+            >
+              ${
+                p.served
+                  ? "Klaar ✓"
+                  : `Geef ${p.request}`
+              }
+            </button>
+          </div>
+        `).join("");
+
+      document.querySelectorAll("[data-serve]").forEach(button => {
+        button.onclick = () => {
+          const index = Number(button.dataset.serve);
+          const passenger = game.passengers[index];
+
+          if (
+            game.phase !== "air" ||
+            !game.autopilot ||
+            passenger.served
+          ) return;
+
+          passenger.served = true;
+          game.score += 100;
+
+          say(
+            `${passenger.name} heeft ${passenger.request} gekregen. ` +
+            "+100 punten!"
+          );
+
+          renderCabin();
+        };
+      });
+    }
+
+    function button(id, value, trueText, falseText) {
+      $(id).textContent = value ? trueText : falseText;
+      $(id).classList.toggle("on", value);
+    }
+
+    function renderButtons() {
+      button(
+        "battery",
+        game.battery,
+        "Batterij: AAN",
+        "Batterij: UIT"
+      );
+
+      button("apu", game.apu, "APU: AAN", "APU: UIT");
+
+      button(
+        "fuelPump",
+        game.fuelPump,
+        "Brandstofpomp: AAN",
+        "Brandstofpomp: UIT"
+      );
+
+      button(
+        "engines",
+        game.engines,
+        "Motoren: AAN",
+        "Motoren starten"
+      );
+
+      button(
+        "parkingBrake",
+        game.parkingBrake,
+        "Parkeerrem: AAN",
+        "Parkeerrem: UIT"
+      );
+
+      $("flaps").textContent = `Flaps: ${game.flaps}°`;
+      $("flaps").classList.toggle("on", game.flaps > 0);
+
+      button(
+        "gear",
+        game.gear,
+        "Gestel: UIT",
+        "Gestel: IN"
+      );
+
+      button(
+        "spoilers",
+        game.spoilers,
+        "Spoilers: UIT",
+        "Spoilers: IN"
+      );
+
+      button(
+        "beacon",
+        game.beacon,
+        "Beacon: AAN",
+        "Beacon: UIT"
+      );
+
+      button(
+        "navLights",
+        game.navLights,
+        "Navigatielicht: AAN",
+        "Navigatielicht: UIT"
+      );
+
+      button(
+        "taxiLights",
+        game.taxiLights,
+        "Taxilicht: AAN",
+        "Taxilicht: UIT"
+      );
+
+      button(
+        "landingLights",
+        game.landingLights,
+        "Landingslicht: AAN",
+        "Landingslicht: UIT"
+      );
+
+      button(
+        "strobe",
+        game.strobe,
+        "Strobe: AAN",
+        "Strobe: UIT"
+      );
+
+      button(
+        "antiIce",
+        game.antiIce,
+        "Anti-ice: AAN",
+        "Anti-ice: UIT"
+      );
+
+      button(
+        "cabinPressure",
+        game.cabinPressure,
+        "Cabinedruk: AAN",
+        "Cabinedruk: UIT"
+      );
+
+      button(
+        "wipers",
+        game.wipers,
+        "Ruitenwissers: AAN",
+        "Ruitenwissers: UIT"
+      );
+
+      button(
+        "autopilot",
+        game.autopilot,
+        "Automatische piloot: AAN",
+        "Automatische piloot: UIT"
+      );
+
+      button(
+        "bags",
+        game.bags,
+        "Bagage gecontroleerd ✓",
+        "Bagage controleren"
+      );
+
+      button(
+        "safety",
+        game.safety,
+        "Veiligheidsuitleg ✓",
+        "Veiligheidsuitleg geven"
+      );
+
+      button(
+        "seatbelts",
+        game.seatbelts,
+        "Riemenlampje: AAN",
+        "Riemenlampje: UIT"
+      );
+
+      button(
+        "door",
+        game.doorClosed,
+        "Cabinedeur: GESLOTEN",
+        "Cabinedeur: OPEN"
+      );
+    }
+
+    function updateHUD() {
+      $("gSpeed").textContent =
+        `${Math.round(game.speed)} kn`;
+
+      $("gAltitude").textContent =
+        `${Math.round(Math.max(0, game.altitude))} m`;
+
+      $("gVertical").textContent =
+        `${game.vertical >= 0 ? "+" : ""}` +
+        `${game.vertical.toFixed(1)} m/s`;
+
+      $("gHeading").textContent =
+        `${String(Math.round(game.heading) % 360)
+          .padStart(3, "0")}°`;
+
+      $("gDistance").textContent =
+        `${game.distance.toFixed(1).replace(".", ",")} km`;
+
+      $("gFuel").textContent =
+        `${Math.ceil(game.fuel)}%`;
+
+      $("throttleText").textContent =
+        `${game.throttle}%`;
+
+      $("trimText").textContent =
+        `${game.trim > 0 ? "+" : ""}${game.trim}`;
+
+      $("targetAltitude").textContent =
+        `${game.targetAltitude} m`;
+
+      $("score").textContent = game.score;
+      $("record").textContent = record;
+
+      $("phase").textContent =
+        game.phase === "ground"
+          ? "🛫 Aan de grond"
+          : game.phase === "air"
+            ? "☁️ In de lucht"
+            : game.phase === "landed"
+              ? "🛬 Veilig geland"
+              : "⚠️ Vlucht voorbij";
+
+      const checks = [
+        ["Bagage gecontroleerd", game.bags],
+        ["Veiligheidsuitleg", game.safety],
+        ["Riemenlampje aan", game.seatbelts],
+        ["Cabinedeur gesloten", game.doorClosed],
+        ["Batterij aan", game.battery],
+        ["APU aan", game.apu],
+        ["Brandstofpomp aan", game.fuelPump],
+        ["Motoren draaien", game.engines ||
+          game.phase === "landed"],
+        ["Flaps op 10° of 20°", game.flaps >= 10],
+        ["Opgestegen", game.phase === "air" ||
+          game.phase === "landed"],
+        [`Passagiers geholpen: ${servedCount()}/6`,
+          servedCount() === 6],
+        ["Veilig geland", game.phase === "landed"]
+      ];
+
+      $("checklist").innerHTML =
+        checks.map(([label, done]) =>
+          `<div class="check">${done ? "✅" : "⬜"} ${label}</div>`
+        ).join("");
+
+      renderButtons();
+    }
+
+    function frame(timestamp) {
+      const dt = Math.min(
+        Math.max((timestamp - lastFrame) / 1000, 0),
+        0.04
+      );
+
+      lastFrame = timestamp;
+
+      updateFlight(dt);
+      drawOutside();
+      updateHUD();
+
+      requestAnimationFrame(frame);
+    }
+
+    // Navigatie
+    $("tabCockpit").onclick = () => setView("cockpit");
+    $("tabCabin").onclick = () => setView("cabin");
+
+    $("newFlight").onclick = () => {
+      game = makeGame();
+      $("throttle").value = 0;
+      $("trim").value = 0;
+      releaseYoke();
+      setView("cabin");
+      say("Nieuwe vlucht! Begin met de cabinecontrole.");
+    };
+
+    // Cabine
+    $("bags").onclick = () => {
+      if (game.phase !== "ground") return;
+
+      game.bags = true;
+      game.score += 15;
+      say("Alle bagage is gecontroleerd.");
+      renderButtons();
+    };
+
+    $("safety").onclick = () => {
+      if (game.phase !== "ground") return;
+
+      game.safety = true;
+      game.score += 15;
+      say("Je hebt de veiligheidsuitleg gegeven.");
+      renderButtons();
+    };
+
+    $("seatbelts").onclick = () => {
+      toggle("seatbelts", "Riemenlampje");
+    };
+
+    $("door").onclick = () => {
+      if (game.phase === "air") {
+        say("De cabinedeur blijft tijdens de vlucht gesloten.");
+        return;
+      }
+
+      toggle("doorClosed", "Cabinedeur gesloten");
+    };
+
+    // Elektriciteit en motoren
+    $("battery").onclick = () => toggle("battery", "Batterij");
+
+    $("apu").onclick = () => {
+      if (!game.battery && !game.apu) {
+        say("Zet eerst de batterij aan.");
+        return;
+      }
+
+      toggle("apu", "APU");
+    };
+
+    $("fuelPump").onclick = () => {
+      toggle("fuelPump", "Brandstofpomp");
+    };
+
+    $("engines").onclick = startEngines;
+
+    $("parkingBrake").onclick = () => {
+      toggle("parkingBrake", "Parkeerrem");
+    };
+
+    $("flaps").onclick = () => {
+      game.flaps =
+        game.flaps === 0 ? 10 :
+        game.flaps === 10 ? 20 : 0;
+
+      say(`Flaps ingesteld op ${game.flaps}°.`);
+      renderButtons();
+    };
+
+    $("gear").onclick = () => {
+      if (game.phase === "ground" && game.speed > 5) {
+        say("Tijdens het rijden blijft het landingsgestel uit.");
+        return;
+      }
+
+      game.gear = !game.gear;
+
+      say(
+        game.gear
+          ? "Landingsgestel uitgeklapt."
+          : "Landingsgestel ingetrokken."
+      );
+
+      renderButtons();
+    };
+
+    $("spoilers").onclick = () => {
+      toggle("spoilers", "Spoilers");
+    };
+
+    // Overheadpaneel
+    const overhead = [
+      ["beacon", "Beacon"],
+      ["navLights", "Navigatielicht"],
+      ["taxiLights", "Taxilicht"],
+      ["landingLights", "Landingslicht"],
+      ["strobe", "Strobe"],
+      ["antiIce", "Anti-ice"],
+      ["cabinPressure", "Cabinedruk"],
+      ["wipers", "Ruitenwissers"]
+    ];
+
+    overhead.forEach(([id, label]) => {
+      $(id).onclick = () => toggle(id, label);
+    });
+
+    $("throttle").oninput = event => {
+      game.throttle = Number(event.target.value);
+      $("throttleText").textContent = `${game.throttle}%`;
+    };
+
+    $("trim").oninput = event => {
+      game.trim = Number(event.target.value);
+      $("trimText").textContent =
+        `${game.trim > 0 ? "+" : ""}${game.trim}`;
+    };
+
+    // Automatische piloot en radio
+    $("autopilot").onclick = () => {
+      if (game.phase !== "air") {
+        say("De automatische piloot kan pas in de lucht aan.");
+        return;
+      }
+
+      game.autopilot = !game.autopilot;
+
+      if (game.autopilot) {
+        game.targetAltitude = clamp(
+          Math.max(
+            150,
+            Math.round((game.altitude + 90) / 50) * 50
+          ),
+          150,
+          700
+        );
+
+        say(
+          "Automatische piloot aan. Je mag nu naar de cabine."
+        );
+      } else {
+        say("Automatische piloot uit. Jij bestuurt weer zelf.");
+      }
+
+      renderButtons();
+    };
+
+    $("altMinus").onclick = () => {
+      game.targetAltitude = clamp(
+        game.targetAltitude - 50,
+        50,
+        700
+      );
+
+      say(`AP-doelhoogte: ${game.targetAltitude} m.`);
+    };
+
+    $("altPlus").onclick = () => {
+      game.targetAltitude = clamp(
+        game.targetAltitude + 50,
+        50,
+        700
+      );
+
+      say(`AP-doelhoogte: ${game.targetAltitude} m.`);
+    };
+
+    $("atc").onclick = () => {
+      if (game.phase === "ground") {
+        say(
+          "📻 Toren: baan vrij. Maak de cabine klaar en controleer " +
+          "je vliegtuig voor vertrek."
+        );
+      } else if (game.phase === "air") {
+        say(
+          `📻 Toren: Bluebay ligt rond 18 km. ` +
+          `Je bent nu op ${game.distance.toFixed(1)} km.`
+        );
+      } else {
+        say("📻 Toren: bedankt voor de vlucht.");
+      }
+    };
+
+    $("mapButton").onclick = () => {
+      say(
+        `🗺️ Route: Sunport → Bluebay. ` +
+        `Afstand ${game.distance.toFixed(1)} van 18 km. ` +
+        "Landingsgebied: 15 tot 19 km."
+      );
+    };
+
+    // Beweegbaar stuur voor muis en touchscreen
+    const yokeArea = $("yokeArea");
+
+    yokeArea.addEventListener("pointerdown", event => {
+      if (game.view !== "cockpit" ||
+          game.phase === "landed" ||
+          game.phase === "crashed") return;
+
+      event.preventDefault();
+      yokeArea.setPointerCapture(event.pointerId);
+      game.draggingYoke = true;
+      setYokeFromPointer(event);
+    });
+
+    yokeArea.addEventListener("pointermove", event => {
+      if (game.draggingYoke) {
+        event.preventDefault();
+        setYokeFromPointer(event);
+      }
+    });
+
+    yokeArea.addEventListener("pointerup", releaseYoke);
+    yokeArea.addEventListener("pointercancel", releaseYoke);
+    yokeArea.addEventListener("lostpointercapture", releaseYoke);
+
+    // Ingedrukt houden op de stuurknoppen
+    document.querySelectorAll("[data-hold]").forEach(button => {
+      const direction = button.dataset.hold;
+
+      button.addEventListener("pointerdown", event => {
+        event.preventDefault();
+        button.setPointerCapture(event.pointerId);
+        hold[direction] = true;
+        button.classList.add("on");
+      });
+
+      const stop = () => {
+        hold[direction] = false;
+        button.classList.remove("on");
+      };
+
+      button.addEventListener("pointerup", stop);
+      button.addEventListener("pointercancel", stop);
+      button.addEventListener("lostpointercapture", stop);
+    });
+
+    // Toetsenbord
+    const keys = {
+      ArrowUp: "up",
+      KeyW: "up",
+      ArrowDown: "down",
+      KeyS: "down",
+      ArrowLeft: "left",
+      KeyA: "left",
+      ArrowRight: "right",
+      KeyD: "right"
+    };
+
+    window.addEventListener("keydown", event => {
+      const direction = keys[event.code];
+
+      if (direction && game.view === "cockpit") {
+        event.preventDefault();
+        hold[direction] = true;
+      }
+    });
+
+    window.addEventListener("keyup", event => {
+      const direction = keys[event.code];
+
+      if (direction) {
+        event.preventDefault();
+        hold[direction] = false;
+      }
+    });
+
+    window.addEventListener("blur", releaseYoke);
+
+    setView("cabin");
+    updateHUD();
+    requestAnimationFrame(frame);
+  </script>
+</body>
+</html>
